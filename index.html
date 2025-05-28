@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0D1B2A;
+      background-image: 
+        repeating-linear-gradient(
+          45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px
+        ),
+        repeating-linear-gradient(
+          -45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px
+        );
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center text-white p-4">
+
+  <h1 class="text-yellow-400 text-2xl sm:text-3xl font-bold mb-6 text-center">
+    PENGUMUMAN KELULUSAN SDN PANGKUR 1 & 2 TAHUN 2025
+  </h1>
+
+  <form id="login-siswa-form" class="w-full max-w-md bg-[#0D1B2ACC] p-6 rounded-lg shadow-lg">
+    <label class="block text-yellow-400 font-semibold mb-1">NISN</label>
+    <input id="nisn" type="text" maxlength="10" required placeholder="Masukkan NISN"
+      class="w-full p-2 rounded mb-4 text-black focus:outline-yellow-400" />
+
+    <label class="block text-yellow-400 font-semibold mb-1">Tanggal Lahir (DDMMYYYY)</label>
+    <input id="tglLahir" type="text" maxlength="8" required placeholder="Contoh: 15032010"
+      class="w-full p-2 rounded mb-6 text-black focus:outline-yellow-400" />
+
+    <button type="submit"
+      class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 rounded">
+      Cek Kelulusan
+    </button>
+  </form>
+
+  <div id="hasilKelulusan" class="mt-6 text-center w-full max-w-md"></div>
+
+  <button id="logout-btn" class="hidden mt-4 bg-yellow-400 text-blue-900 font-semibold px-4 py-2 rounded hover:bg-yellow-300">
+    Logout
+  </button>
+
+  <button id="admin-login-btn" title="Login Admin"
+    class="fixed top-3 right-3 text-xs bg-yellow-400 text-blue-900 font-semibold px-2 py-1 rounded opacity-80 hover:opacity-100">
+    Admin
+  </button>
+
+  <!-- Modal Admin -->
+  <div id="modal-admin-login" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+    <div class="bg-[#0D1B2A] p-6 rounded-lg w-full max-w-sm relative">
+      <h2 class="text-yellow-400 text-xl font-bold mb-4 text-center">Login Admin</h2>
+      <form id="admin-login-form">
+        <label class="block text-yellow-400 font-semibold mb-1">Username</label>
+        <input id="adminUsername" type="text" required
+          class="w-full mb-4 p-2 rounded text-black focus:outline-yellow-400" />
+        <label class="block text-yellow-400 font-semibold mb-1">Password</label>
+        <input id="adminPassword" type="password" required
+          class="w-full mb-6 p-2 rounded text-black focus:outline-yellow-400" />
+        <button type="submit"
+          class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 rounded">
+          Login
+        </button>
+      </form>
+      <button id="close-admin-modal" class="absolute top-2 right-3 text-yellow-400 font-bold text-lg">×</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const ADMIN_USERNAME = "admin";
+    const ADMIN_PASSWORD = "12345678";
+
+    const adminModal = document.getElementById('modal-admin-login');
+    document.getElementById('admin-login-btn').addEventListener('click', () => {
+      adminModal.classList.remove('hidden');
+    });
+    document.getElementById('close-admin-modal').addEventListener('click', () => {
+      adminModal.classList.add('hidden');
+    });
+
+    document.getElementById('admin-login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const u = document.getElementById('adminUsername').value.trim();
+      const p = document.getElementById('adminPassword').value.trim();
+      if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
+        alert("Login admin berhasil!");
+        localStorage.setItem("adminLoggedIn", "true");
+        window.location.href = "admin-dashboard.html";
+      } else {
+        alert("Username atau password salah.");
+      }
+    });
+
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('nisnLogin');
+      sessionStorage.removeItem('tglLahirLogin');
+      document.getElementById('hasilKelulusan').innerHTML = "";
+      logoutBtn.classList.add('hidden');
+      document.getElementById('login-siswa-form').classList.remove('hidden');
+    });
+
+    function getDataSiswa() {
+      return JSON.parse(localStorage.getItem("dataSiswa")) || [];
+    }
+
+    document.getElementById('login-siswa-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nisn = document.getElementById('nisn').value.trim();
+      const tgl = document.getElementById('tglLahir').value.trim();
+      const hasil = document.getElementById('hasilKelulusan');
+
+      if (nisn === "" || tgl.length !== 8) {
+        alert("Isi NISN dan Tanggal Lahir dengan benar.");
+        return;
+      }
+
+      const siswa = getDataSiswa().find(s => s.nisn === nisn && s.ttl === tgl);
+      if (!siswa) {
+        hasil.innerHTML = `<p class="text-red-400 font-semibold">Data tidak ditemukan. Periksa kembali NISN dan Tanggal Lahir Anda.</p>`;
+        return;
+      }
+
+      sessionStorage.setItem("nisnLogin", nisn);
+      sessionStorage.setItem("tglLahirLogin", tgl);
+
+      const statusBox = siswa.lulus
+        ? `<div class="mt-2 inline-block px-4 py-2 rounded-lg bg-green-600 text-white font-bold text-lg">LULUS</div>
+           <p class="text-green-300 mt-4">Selamat atas kelulusanmu, tetap semangat meraih masa depan!</p>`
+        : `<div class="mt-2 inline-block px-4 py-2 rounded-lg bg-red-600 text-white font-bold text-lg">TIDAK LULUS</div>
+           <p class="text-red-300 mt-4">Tetap semangat, ini bukan akhir segalanya. Kesempatan masih terbuka luas!</p>`;
+
+      hasil.innerHTML = `
+        <div class="bg-white text-gray-800 rounded-xl shadow-xl p-6 w-full text-center">
+          <h2 class="text-xl sm:text-2xl font-bold mb-2 capitalize">Halo, ${siswa.nama}</h2>
+          <p class="text-gray-600">Nilai Akhir:</p>
+          <p class="text-3xl font-bold text-blue-700">${siswa.nilai}</p>
+          ${statusBox}
+          <div class="mt-6 flex justify-center gap-2 flex-wrap">
+            <button id="btnCetak" class="text-sm px-3 py-1.5 bg-blue-900 text-white rounded hover:bg-blue-800">Cetak</button>
+            <button id="btnUnduhPDF" class="text-sm px-3 py-1.5 bg-yellow-400 text-blue-900 rounded hover:bg-yellow-300">Unduh PDF</button>
+          </div>
+        </div>
+      `;
+
+      logoutBtn.classList.remove('hidden');
+      document.getElementById('login-siswa-form').classList.add('hidden');
+
+      document.getElementById('btnCetak').addEventListener('click', () => window.print());
+
+      document.getElementById('btnUnduhPDF').addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025", 10, 20);
+        doc.setFontSize(14);
+        doc.text(`Nama: ${siswa.nama}`, 10, 40);
+        doc.text(`NISN: ${siswa.nisn}`, 10, 50);
+        doc.text(`Nilai Akhir: ${siswa.nilai}`, 10, 60);
+        doc.setTextColor(siswa.lulus ? 0 : 255, siswa.lulus ? 128 : 0, 0);
+        doc.text(`Status: ${siswa.lulus ? "LULUS" : "TIDAK LULUS"}`, 10, 70);
+        doc.save(`Pengumuman_Kelulusan_${siswa.nisn}.pdf`);
+      });
+    });
+  </script>
+</body>
+</html>
