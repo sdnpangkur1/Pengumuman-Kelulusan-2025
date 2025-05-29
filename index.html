@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <link rel="shortcut icon" href="nw.png" type="image/x-icon" />
   <title>Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -32,13 +31,11 @@
     TAHUN 2025
   </h1>
 
-  <!-- Countdown -->
   <div id="countdown-container" class="text-center mb-6">
     <p class="text-yellow-400 text-lg font-semibold">Pengumuman akan dibuka dalam:</p>
     <div id="countdown" class="text-3xl font-bold mt-2">--:--:--</div>
   </div>
 
-  <!-- Form Login Siswa -->
   <form id="login-siswa-form" class="w-full max-w-md bg-[#0D1B2ACC] p-6 rounded-lg shadow-lg hidden">
     <label class="block text-yellow-400 font-semibold mb-1">NISN</label>
     <input id="nisn" type="text" maxlength="10" required placeholder="Masukkan NISN"
@@ -56,17 +53,41 @@
 
   <div id="hasilKelulusan" class="mt-6 text-center w-full max-w-md"></div>
 
+  <div id="loading" class="hidden text-center mt-6">
+    <div
+      class="relative w-full max-w-md h-8 bg-green-200 rounded overflow-hidden mx-auto mb-4"
+      aria-label="Loading progress bar"
+      role="progressbar"
+    >
+      <div
+        id="loading-bar"
+        class="absolute top-0 left-0 h-full bg-green-500"
+        style="width: 0;"
+      >
+        <div
+          class="w-full h-full bg-green-600 opacity-30"
+          style="background-image: repeating-linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.3) 0,
+            rgba(255, 255, 255, 0.3) 5px,
+            transparent 5px,
+            transparent 10px
+          );"
+        ></div>
+      </div>
+    </div>
+    <p class="text-green-700 font-semibold">Memproses data kelulusan...</p>
+  </div>
+
   <button id="logout-btn" class="hidden mt-4 bg-yellow-400 text-blue-900 font-semibold px-4 py-2 rounded hover:bg-yellow-300">
     Logout
   </button>
 
-  <!-- Tombol Login Admin -->
   <button id="admin-login-btn" title="Login Admin"
     class="fixed top-3 right-3 text-xs bg-yellow-400 text-blue-900 font-semibold px-2 py-1 rounded opacity-80 hover:opacity-100">
     Admin
   </button>
 
-  <!-- Modal Admin Login -->
   <div id="modal-admin-login" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
     <div class="bg-[#0D1B2A] p-6 rounded-lg w-full max-w-sm relative">
       <h2 class="text-yellow-400 text-xl font-bold mb-4 text-center">Login Admin</h2>
@@ -88,12 +109,8 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    // Tanggal dan waktu pengumuman dibuka
-    let waktuBuka = localStorage.getItem("waktuCountdown");
-if (!waktuBuka) {
-  waktuBuka = "2025-06-10T08:00:00"; // default jika belum diset
-}
-waktuBuka = new Date(waktuBuka);
+    let waktuBuka = localStorage.getItem("waktuCountdown") || "2025-06-10T08:00:00";
+    waktuBuka = new Date(waktuBuka);
 
     const countdownContainer = document.getElementById("countdown-container");
     const countdownDisplay = document.getElementById("countdown");
@@ -102,37 +119,26 @@ waktuBuka = new Date(waktuBuka);
     function updateCountdown() {
       const now = new Date();
       const selisih = waktuBuka - now;
-
       if (selisih <= 0 || localStorage.getItem("adminLoggedIn") === "true") {
-  countdownContainer.style.display = "none";
-  loginForm.classList.remove("hidden");
-  clearInterval(interval);
-  return;
-}
-
+        countdownContainer.style.display = "none";
+        loginForm.classList.remove("hidden");
+        clearInterval(interval);
+        return;
+      }
+      const hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
       const jam = Math.floor((selisih / (1000 * 60 * 60)) % 24);
       const menit = Math.floor((selisih / (1000 * 60)) % 60);
       const detik = Math.floor((selisih / 1000) % 60);
-
-      const hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
-countdownDisplay.textContent = `${hari.toString().padStart(2, '0')} hari ${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
-
+      countdownDisplay.textContent = `${hari.toString().padStart(2, '0')} hari ${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
     }
-
     const interval = setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Admin login logic
     const ADMIN_USERNAME = "admin";
     const ADMIN_PASSWORD = "12345678";
-
     const adminModal = document.getElementById('modal-admin-login');
-    document.getElementById('admin-login-btn').addEventListener('click', () => {
-      adminModal.classList.remove('hidden');
-    });
-    document.getElementById('close-admin-modal').addEventListener('click', () => {
-      adminModal.classList.add('hidden');
-    });
+    document.getElementById('admin-login-btn').addEventListener('click', () => adminModal.classList.remove('hidden'));
+    document.getElementById('close-admin-modal').addEventListener('click', () => adminModal.classList.add('hidden'));
 
     document.getElementById('admin-login-form').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -147,7 +153,6 @@ countdownDisplay.textContent = `${hari.toString().padStart(2, '0')} hari ${jam.t
       }
     });
 
-    // Logout tombol
     const logoutBtn = document.getElementById('logout-btn');
     logoutBtn.addEventListener('click', () => {
       sessionStorage.removeItem('nisnLogin');
@@ -161,11 +166,28 @@ countdownDisplay.textContent = `${hari.toString().padStart(2, '0')} hari ${jam.t
       return JSON.parse(localStorage.getItem("dataSiswa")) || [];
     }
 
+    // Fungsi animasi bar loading
+    function animateLoadingBar(duration = 3000) {
+      const loadingBar = document.getElementById('loading-bar');
+      let start = null;
+
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duration, 1);
+        loadingBar.style.width = `${progress * 100}%`;
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
     document.getElementById('login-siswa-form').addEventListener('submit', function (e) {
       e.preventDefault();
       const nisn = document.getElementById('nisn').value.trim();
       const tgl = document.getElementById('tglLahir').value.trim();
       const hasil = document.getElementById('hasilKelulusan');
+      const loading = document.getElementById('loading');
 
       if (nisn === "" || tgl.length !== 8) {
         alert("Isi NISN dan Tanggal Lahir dengan benar.");
@@ -180,45 +202,73 @@ countdownDisplay.textContent = `${hari.toString().padStart(2, '0')} hari ${jam.t
 
       sessionStorage.setItem("nisnLogin", nisn);
       sessionStorage.setItem("tglLahirLogin", tgl);
-
-      const statusBox = siswa.lulus
-        ? `<div class="mt-2 inline-block px-28 py-2 rounded-lg bg-green-600 text-white font-bold text-lg">LULUS</div>
-           <p class="text-green-350 mt-4">Selamat atas kelulusanmu, tetap semangat meraih masa depan!</p>`
-        : `<div class="mt-2 inline-block px-28 py-2 rounded-lg bg-red-600 text-white font-bold text-lg">TIDAK LULUS</div>
-           <p class="text-red-350 mt-4">Tetap semangat, ini bukan akhir segalanya. Kesempatan masih terbuka luas!</p>`;
-
-      hasil.innerHTML = `
-        <div class="bg-white text-gray-800 rounded-xl shadow-xl p-6 w-full text-center">
-          <h2 class="text-xl sm:text-4xl font-bold mb-2 capitalize">Halo, ${siswa.nama}</h2>
-          <p class="text-gray-600">Nilai Akhir:</p>
-          <p class="text-3xl font-bold text-blue-750">${siswa.nilai}</p>
-          ${statusBox}
-          <div class="mt-6 flex justify-center gap-2 flex-wrap">
-            <button id="btnCetak" class="text-sm px-3 py-1.5 bg-blue-900 text-white rounded hover:bg-blue-800">Cetak</button>
-            <button id="btnUnduhPDF" class="text-sm px-3 py-1.5 bg-yellow-400 text-blue-900 rounded hover:bg-yellow-300">Unduh PDF</button>
-          </div>
-        </div>
-      `;
-
-      logoutBtn.classList.remove('hidden');
       loginForm.classList.add('hidden');
+      loading.classList.remove('hidden');
+      hasil.innerHTML = "";
+      animateLoadingBar(15000);
 
-      document.getElementById('btnCetak').addEventListener('click', () => window.print());
+      setTimeout(() => {
+        loading.classList.add('hidden');
 
-      document.getElementById('btnUnduhPDF').addEventListener('click', () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text("Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025", 10, 20);
-        doc.setFontSize(14);
-        doc.text(`Nama: ${siswa.nama}`, 10, 40);
-        doc.text(`NISN: ${siswa.nisn}`, 10, 50);
-        doc.text(`Nilai Akhir: ${siswa.nilai}`, 10, 60);
-        doc.setTextColor(siswa.lulus ? 0 : 255, siswa.lulus ? 128 : 0, 0);
-        doc.text(`Status: ${siswa.lulus ? "LULUS" : "TIDAK LULUS"}`, 10, 70);
-        doc.save(`Pengumuman_Kelulusan_${siswa.nisn}.pdf`);
-      });
+        const statusBox = siswa.lulus
+          ? `<div class="mt-2 inline-block px-20 py-2 rounded-lg bg-green-600 text-white font-bold text-lg">LULUS</div>
+             <p class="text-yellow-300 mt-1">Nilai ambang batas kelulusan: <span class="font-semibold">75.00</span></p>
+             <p class="text-black-300 mt-4">Selamat atas kelulusanmu, tetap semangat meraih masa depan!</p>`
+          : `<div class="mt-2 inline-block px-16 py-2 rounded-lg bg-red-600 text-white font-bold text-lg">TIDAK LULUS</div>
+             <p class="text-yellow-300 mt-1">Nilai ambang batas kelulusan: <span class="font-semibold">75.00</span></p>
+             <p class="text-black-300 mt-4">Tetap semangat, ini bukan akhir segalanya. Kesempatan masih terbuka luas!</p>`;
+
+        hasil.innerHTML = `
+          <div class="bg-white text-gray-800 rounded-xl shadow-xl p-6 w-full text-center">
+            <h2 class="text-xl sm:text-4xl font-bold mb-2 capitalize">Halo, ${siswa.nama}</h2>
+            <p class="text-gray-600">Nilai Akhir:</p>
+            <p class="text-3xl font-bold text-blue-750">${siswa.nilai}</p>
+            ${statusBox}
+            <div class="mt-6 flex justify-center gap-2 flex-wrap">
+              <button id="btnCetak" class="text-sm px-3 py-1.5 bg-blue-900 text-white rounded hover:bg-blue-800">Cetak</button>
+              <button id="btnUnduhPDF" class="text-sm px-3 py-1.5 bg-yellow-400 text-blue-900 rounded hover:bg-yellow-300">Unduh PDF</button>
+            </div>
+          </div>`;
+
+        logoutBtn.classList.remove('hidden');
+
+        document.getElementById('btnCetak').addEventListener('click', () => window.print());
+
+        document.getElementById('btnUnduhPDF').addEventListener('click', () => {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          doc.setFontSize(16);
+          doc.text(`Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025`, 10, 20);
+          doc.setFontSize(14);
+          doc.text(`Nama: ${siswa.nama}`, 10, 40);
+          doc.text(`NISN: ${siswa.nisn}`, 10, 50);
+          doc.text(`Nilai Akhir: ${siswa.nilai}`, 10, 60);
+          doc.text(`Status: ${siswa.lulus ? "LULUS" : "TIDAK LULUS"}`, 10, 70);
+          doc.text(`Nilai ambang batas kelulusan: 75.00`, 10, 80);
+          doc.save(`Kelulusan_${siswa.nisn}.pdf`);
+        });
+
+      }, 15000);
+    });
+
+    // Cek login sesi, tampilkan hasil langsung kalau sudah login
+    window.addEventListener('load', () => {
+      const nisnLogin = sessionStorage.getItem('nisnLogin');
+      const tglLogin = sessionStorage.getItem('tglLahirLogin');
+      if (nisnLogin && tglLogin) {
+        document.getElementById('nisn').value = nisnLogin;
+        document.getElementById('tglLahir').value = tglLogin;
+        document.getElementById('login-siswa-form').dispatchEvent(new Event('submit', { cancelable: true }));
+      }
     });
   </script>
+
+<footer class="mt-12 text-center text-gray-400 text-xs select-none">
+  <p>© Dispendikbud Kabupaten Ngawi.</p>
+  <p>Nilai kelulusan Terintegrasi oleh Dinas Pendidikan Dan Kebudayaan Kabupaten Ngawi</p>
+</footer>
+</body>
+</html>
+
 </body>
 </html>
