@@ -20,9 +20,9 @@
     }
   </style>
 
-  <!-- Firebase SDK (versi 10) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
+  <!-- Firebase SDK versi 7 -->
+  <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
 
   <script>
     // Konfigurasi Firebase
@@ -37,8 +37,8 @@
       measurementId: "G-EE2H5ZNX6M"
     };
 
-    // Inisialisasi Firebase versi 10
-    const app = firebase.initializeApp(firebaseConfig);
+    // Inisialisasi Firebase versi 7 (namespace)
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
   </script>
 </head>
@@ -182,191 +182,241 @@
 
   <script>
     // Countdown & tampilkan login siswa seperti kode Anda
-    let waktuBuka = localStorage.getItem("waktuCountdown") || "2025-06-10T08:00:00";
-    waktuBuka = new Date(waktuBuka);
+    let waktuBuka = localStorage.getItem("waktuCountdown");
+    if (!waktuBuka) {
+      // contoh: 29 Mei 2025 jam 10:00 WIB
+      const tglBuka = new Date(2025, 4, 29, 10, 0, 0); // bulan 0-based: 4=Mei
+      waktuBuka = tglBuka.getTime();
+      localStorage.setItem("waktuCountdown", waktuBuka);
+    } else {
+      waktuBuka = parseInt(waktuBuka);
+    }
 
-    const countdownContainer = document.getElementById("countdown-container");
     const countdownEl = document.getElementById("countdown");
+    const countdownContainer = document.getElementById("countdown-container");
     const loginForm = document.getElementById("login-siswa-form");
     const hasilKelulusan = document.getElementById("hasilKelulusan");
-    const loading = document.getElementById("loading");
-    const loadingBar = document.getElementById("loading-bar");
+    const loadingDiv = document.getElementById("loading");
     const logoutBtn = document.getElementById("logout-btn");
-
     const adminLoginBtn = document.getElementById("admin-login-btn");
-    const adminLoginModal = document.getElementById("modal-admin-login");
-    const adminLoginForm = document.getElementById("admin-login-form");
+    const modalAdminLogin = document.getElementById("modal-admin-login");
     const closeAdminModalBtn = document.getElementById("close-admin-modal");
-
+    const adminLoginForm = document.getElementById("admin-login-form");
     const uploadSiswaContainer = document.getElementById("upload-siswa-container");
     const uploadSiswaForm = document.getElementById("upload-siswa-form");
     const batalUploadBtn = document.getElementById("batal-upload");
 
-    let countdownInterval;
-    let loginAdminStatus = false;
-
     function updateCountdown() {
-      const now = new Date();
-      let diff = waktuBuka - now;
-      if (diff <= 0) {
+      const now = Date.now();
+      const sisa = waktuBuka - now;
+
+      if (sisa <= 0) {
         countdownContainer.style.display = "none";
-        loginForm.classList.remove("hidden");
-        clearInterval(countdownInterval);
-        return;
+        loginForm.style.display = "block";
+        clearInterval(intervalCountdown);
+      } else {
+        let detik = Math.floor(sisa / 1000) % 60;
+        let menit = Math.floor(sisa / (1000 * 60)) % 60;
+        let jam = Math.floor(sisa / (1000 * 60 * 60)) % 24;
+        let hari = Math.floor(sisa / (1000 * 60 * 60 * 24));
+        countdownEl.textContent = `${hari} Hari ${jam.toString().padStart(2, "0")}:${menit
+          .toString()
+          .padStart(2, "0")}:${detik.toString().padStart(2, "0")}`;
       }
-      const jam = Math.floor(diff / 1000 / 60 / 60);
-      const menit = Math.floor((diff / 1000 / 60) % 60);
-      const detik = Math.floor((diff / 1000) % 60);
-      countdownEl.textContent = `${jam.toString().padStart(2, "0")}:${menit.toString().padStart(2, "0")}:${detik.toString().padStart(2, "0")}`;
     }
 
-    countdownInterval = setInterval(updateCountdown, 1000);
+    const intervalCountdown = setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Firebase Realtime Database instance (sudah di atas)
-
-    // Fungsi untuk cek login siswa
-    loginForm.addEventListener("submit", (e) => {
+    // Fungsi validasi NISN dan tanggal lahir siswa
+    loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      const nisn = document.getElementById("nisn").value.trim();
-      const tglLahir = document.getElementById("tglLahir").value.trim();
+      const nisnInput = document.getElementById("nisn").value.trim();
+      const tglLahirInput = document.getElementById("tglLahir").value.trim();
 
-      if (!nisn || !tglLahir || tglLahir.length !== 8) {
-        alert("Harap isi NISN dan tanggal lahir dengan benar (format DDMMYYYY).");
+      if (nisnInput.length === 0 || tglLahirInput.length !== 8) {
+        alert("Mohon isi NISN dan Tanggal Lahir dengan benar!");
         return;
       }
 
-      loading.classList.remove("hidden");
+      loadingDiv.classList.remove("hidden");
       hasilKelulusan.innerHTML = "";
-      loadingBar.style.width = "0";
 
-      let progress = 0;
-      let interval = setInterval(() => {
-        progress += 10;
-        loadingBar.style.width = progress + "%";
-        if (progress >= 100) {
-          clearInterval(interval);
+      // Ambil data siswa dari Firebase Realtime Database
+      db.ref("dataSiswa/" + nisnInput)
+        .once("value")
+        .then((snapshot) => {
+          loadingDiv.classList.add("hidden");
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data.ttl === tglLahirInput) {
+              // Tanggal lahir cocok, tampilkan hasil
+              tampilkanHasil(data);
+              loginForm.style.display = "none";
+              logoutBtn.style.display = "inline-block";
+              localStorage.setItem("nisnLogin", nisnInput);
+              localStorage.setItem("ttlLogin", tglLahirInput);
+            } else {
+              alert("Tanggal lahir tidak sesuai.");
+            }
+          } else {
+            alert("Data siswa tidak ditemukan.");
+          }
+        })
+        .catch((error) => {
+          loadingDiv.classList.add("hidden");
+          alert("Terjadi kesalahan: " + error.message);
+        });
+    });
 
-          // Ambil data dari Firebase
-          db.ref("dataSiswa/" + nisn).get().then((snapshot) => {
-            loading.classList.add("hidden");
+    // Fungsi tampilkan hasil kelulusan dan tombol cetak PDF
+    function tampilkanHasil(data) {
+      const status = data.lulus === "true" || data.lulus === true;
+      hasilKelulusan.innerHTML = `
+        <div class="bg-yellow-400 text-blue-900 rounded p-6 shadow-lg">
+          <h2 class="text-2xl font-bold mb-2">${data.nama}</h2>
+          <p class="mb-1">NISN: ${data.nisn}</p>
+          <p class="mb-1">Tanggal Lahir: ${data.ttl}</p>
+          <p class="mb-1">Nilai Akhir: ${data.nilai}</p>
+          <p class="mb-4 font-bold ${status ? 'text-green-700' : 'text-red-700'}">Status: ${status ? 'LULUS' : 'TIDAK LULUS'}</p>
+          <button id="btnCetakPdf" class="bg-blue-900 text-yellow-400 px-4 py-2 rounded font-semibold hover:bg-blue-800">Cetak PDF</button>
+        </div>
+      `;
+
+      document.getElementById("btnCetakPdf").addEventListener("click", () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(16);
+        doc.setTextColor("#0D1B2A");
+        doc.text("Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025", 20, 20);
+
+        doc.setFontSize(14);
+        doc.setTextColor("#FBBF24"); // kuning
+        doc.text(`Nama: ${data.nama}`, 20, 40);
+        doc.text(`NISN: ${data.nisn}`, 20, 50);
+        doc.text(`Tanggal Lahir: ${data.ttl}`, 20, 60);
+        doc.text(`Nilai Akhir: ${data.nilai}`, 20, 70);
+
+        const statusText = status ? "LULUS" : "TIDAK LULUS";
+        doc.setTextColor(status ? "#22C55E" : "#DC2626"); // hijau atau merah
+        doc.text(`Status: ${statusText}`, 20, 80);
+
+        doc.save(`Kelulusan_${data.nisn}.pdf`);
+      });
+    }
+
+    // Logout siswa
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("nisnLogin");
+      localStorage.removeItem("ttlLogin");
+      hasilKelulusan.innerHTML = "";
+      loginForm.style.display = "block";
+      logoutBtn.style.display = "none";
+    });
+
+    // Cek session login siswa
+    window.addEventListener("load", () => {
+      const nisnLogin = localStorage.getItem("nisnLogin");
+      const ttlLogin = localStorage.getItem("ttlLogin");
+
+      if (nisnLogin && ttlLogin) {
+        // Auto login, langsung tampilkan hasil
+        db.ref("dataSiswa/" + nisnLogin)
+          .once("value")
+          .then((snapshot) => {
             if (snapshot.exists()) {
               const data = snapshot.val();
-              if (data.ttl === tglLahir) {
-                hasilKelulusan.innerHTML = `
-                <div class="bg-yellow-400 text-blue-900 p-4 rounded-lg shadow-md">
-                  <h2 class="font-bold text-xl mb-2">${data.nama}</h2>
-                  <p>NISN: ${data.nisn}</p>
-                  <p>Tanggal Lahir: ${data.ttl}</p>
-                  <p>Nilai Akhir: ${data.nilai}</p>
-                  <p class="mt-2 font-semibold text-lg">${data.lulus ? "SELAMAT, ANDA LULUS!" : "MOHON MAAF, ANDA TIDAK LULUS."}</p>
-                  <button id="cetak-pdf" class="mt-4 bg-blue-900 hover:bg-blue-800 text-yellow-400 font-bold py-2 px-4 rounded">Cetak PDF</button>
-                </div>
-                `;
-
-                document.getElementById("cetak-pdf").addEventListener("click", () => {
-                  const { jsPDF } = window.jspdf;
-                  const doc = new jsPDF();
-                  doc.setFontSize(16);
-                  doc.text("Pengumuman Kelulusan SDN PANGKUR 1 & 2", 20, 20);
-                  doc.setFontSize(14);
-                  doc.text(`Nama: ${data.nama}`, 20, 40);
-                  doc.text(`NISN: ${data.nisn}`, 20, 50);
-                  doc.text(`Tanggal Lahir: ${data.ttl}`, 20, 60);
-                  doc.text(`Nilai Akhir: ${data.nilai}`, 20, 70);
-                  doc.text(data.lulus ? "SELAMAT, ANDA LULUS!" : "MOHON MAAF, ANDA TIDAK LULUS.", 20, 90);
-                  doc.save(`Kelulusan_${data.nisn}.pdf`);
-                });
-
-                logoutBtn.classList.remove("hidden");
-                loginForm.classList.add("hidden");
+              if (data.ttl === ttlLogin) {
+                tampilkanHasil(data);
+                loginForm.style.display = "none";
+                logoutBtn.style.display = "inline-block";
+                countdownContainer.style.display = "none";
               } else {
-                alert("Tanggal lahir tidak sesuai.");
+                localStorage.removeItem("nisnLogin");
+                localStorage.removeItem("ttlLogin");
+                loginForm.style.display = "block";
+                logoutBtn.style.display = "none";
               }
             } else {
-              loading.classList.add("hidden");
-              alert("Data siswa tidak ditemukan.");
+              localStorage.removeItem("nisnLogin");
+              localStorage.removeItem("ttlLogin");
+              loginForm.style.display = "block";
+              logoutBtn.style.display = "none";
             }
-          }).catch(() => {
-            loading.classList.add("hidden");
-            alert("Gagal mengambil data.");
           });
-        }
-      }, 100);
+      }
     });
 
-    logoutBtn.addEventListener("click", () => {
-      loginForm.reset();
-      hasilKelulusan.innerHTML = "";
-      loginForm.classList.remove("hidden");
-      logoutBtn.classList.add("hidden");
-    });
-
-    // Admin login button
+    // Admin login modal toggle
     adminLoginBtn.addEventListener("click", () => {
-      adminLoginModal.classList.remove("hidden");
+      modalAdminLogin.classList.remove("hidden");
     });
-
     closeAdminModalBtn.addEventListener("click", () => {
-      adminLoginModal.classList.add("hidden");
+      modalAdminLogin.classList.add("hidden");
       adminLoginForm.reset();
     });
 
-    // Admin login form
+    // Admin login (contoh hardcoded username & password)
     adminLoginForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const username = document.getElementById("adminUsername").value.trim();
       const password = document.getElementById("adminPassword").value.trim();
 
-      if (username === "admin" && password === "admin123") {
-        alert("Login admin berhasil!");
-        loginAdminStatus = true;
-        adminLoginModal.classList.add("hidden");
+      // Ganti dengan validasi admin sesungguhnya jika perlu
+      if (username === "admin" && password === "password123") {
+        modalAdminLogin.classList.add("hidden");
         adminLoginForm.reset();
+        adminLoginBtn.style.display = "none";
         uploadSiswaContainer.classList.remove("hidden");
       } else {
-        alert("Username atau password salah!");
+        alert("Username atau password admin salah.");
       }
     });
 
     batalUploadBtn.addEventListener("click", () => {
-      uploadSiswaForm.reset();
       uploadSiswaContainer.classList.add("hidden");
+      uploadSiswaForm.reset();
+      adminLoginBtn.style.display = "inline-block";
     });
 
-    // Upload data siswa form
+    // Upload data siswa ke Firebase Realtime Database
     uploadSiswaForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (!loginAdminStatus) {
-        alert("Anda harus login admin terlebih dahulu.");
-        return;
-      }
+
       const nama = document.getElementById("nama").value.trim();
       const nisnUpload = document.getElementById("nisnUpload").value.trim();
       const ttl = document.getElementById("ttl").value.trim();
       const nilai = parseFloat(document.getElementById("nilai").value.trim());
       const lulus = document.getElementById("lulus").value;
 
-      if (!nama || !nisnUpload || !ttl || isNaN(nilai) || (lulus !== "true" && lulus !== "false")) {
-        alert("Harap isi semua data dengan benar.");
+      if (!nama || !nisnUpload || ttl.length !== 8 || isNaN(nilai) || (lulus !== "true" && lulus !== "false")) {
+        alert("Mohon isi data dengan benar.");
         return;
       }
 
-      db.ref("dataSiswa/" + nisnUpload).set({
+      const dataBaru = {
         nama: nama,
         nisn: nisnUpload,
         ttl: ttl,
         nilai: nilai,
-        lulus: lulus === "true"
-      }).then(() => {
-        alert("Data siswa berhasil disimpan.");
-        uploadSiswaForm.reset();
-        uploadSiswaContainer.classList.add("hidden");
-      }).catch((error) => {
-        alert("Gagal menyimpan data: " + error.message);
-      });
+        lulus: lulus,
+      };
+
+      db.ref("dataSiswa/" + nisnUpload)
+        .set(dataBaru)
+        .then(() => {
+          alert("Data siswa berhasil disimpan.");
+          uploadSiswaForm.reset();
+          uploadSiswaContainer.classList.add("hidden");
+          adminLoginBtn.style.display = "inline-block";
+        })
+        .catch((error) => {
+          alert("Gagal menyimpan data: " + error.message);
+        });
     });
   </script>
+
 </body>
 
 </html>
