@@ -70,7 +70,6 @@
   </h1>
 
   <button id="btn-logout" class="btn">Logout</button>
-
   <button id="btn-tambah" class="btn mb-4">Tambah Data Siswa</button>
 
   <table>
@@ -87,6 +86,17 @@
     <tbody id="tbody-siswa"></tbody>
   </table>
 
+  <!-- Pengaturan Waktu Countdown -->
+  <div class="bg-white text-gray-900 p-4 rounded shadow mt-8 max-w-md">
+    <h2 class="text-lg font-bold mb-2">Pengaturan Waktu Countdown</h2>
+    <form id="form-waktu">
+      <label class="block mb-1 font-medium">Waktu Buka Pengumuman:</label>
+      <input type="datetime-local" id="inputWaktu" required class="w-full p-2 rounded border mb-4" />
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan Waktu</button>
+    </form>
+  </div>
+
+  <!-- Script untuk pengelolaan data dan countdown -->
   <script>
     // Cek login admin
     if (localStorage.getItem("adminLoggedIn") !== "true") {
@@ -160,7 +170,20 @@
     });
 
     renderTabel();
-  </script>
 
+    // Script pengaturan waktu countdown
+    const inputWaktu = document.getElementById('inputWaktu');
+    const waktuTersimpan = localStorage.getItem("waktuCountdown");
+    if (waktuTersimpan) {
+      inputWaktu.value = new Date(waktuTersimpan).toISOString().slice(0, 16);
+    }
+
+    document.getElementById("form-waktu").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const waktuBaru = new Date(inputWaktu.value).toISOString();
+      localStorage.setItem("waktuCountdown", waktuBaru);
+      alert("Waktu pengumuman berhasil diperbarui!");
+    });
+  </script>
 </body>
 </html>

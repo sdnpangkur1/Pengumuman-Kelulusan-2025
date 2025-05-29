@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="shortcut icon" href="nw.png" type="image/x-icon" />
   <title>Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -20,11 +22,22 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center text-white p-4">
 
+  <div class="mb-4">
+    <img src="logo.png" alt="Logo SDN PANGKUR 1" class="h-20 mx-auto" />
+  </div>
+
   <h1 class="text-yellow-400 text-2xl sm:text-3xl font-bold mb-6 text-center">
-    PENGUMUMAN KELULUSAN SDN PANGKUR 1 & 2 TAHUN 2025
+    <b>PENGUMUMAN KELULUSAN SDN PANGKUR 1 & 2 TAHUN 2025</b>
   </h1>
 
-  <form id="login-siswa-form" class="w-full max-w-md bg-[#0D1B2ACC] p-6 rounded-lg shadow-lg">
+  <!-- Countdown -->
+  <div id="countdown-container" class="text-center mb-6">
+    <p class="text-yellow-400 text-lg font-semibold">Pengumuman akan dibuka dalam:</p>
+    <div id="countdown" class="text-3xl font-bold mt-2">--:--:--</div>
+  </div>
+
+  <!-- Form Login Siswa -->
+  <form id="login-siswa-form" class="w-full max-w-md bg-[#0D1B2ACC] p-6 rounded-lg shadow-lg hidden">
     <label class="block text-yellow-400 font-semibold mb-1">NISN</label>
     <input id="nisn" type="text" maxlength="10" required placeholder="Masukkan NISN"
       class="w-full p-2 rounded mb-4 text-black focus:outline-yellow-400" />
@@ -45,12 +58,13 @@
     Logout
   </button>
 
+  <!-- Tombol Login Admin -->
   <button id="admin-login-btn" title="Login Admin"
     class="fixed top-3 right-3 text-xs bg-yellow-400 text-blue-900 font-semibold px-2 py-1 rounded opacity-80 hover:opacity-100">
     Admin
   </button>
 
-  <!-- Modal Admin -->
+  <!-- Modal Admin Login -->
   <div id="modal-admin-login" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
     <div class="bg-[#0D1B2A] p-6 rounded-lg w-full max-w-sm relative">
       <h2 class="text-yellow-400 text-xl font-bold mb-4 text-center">Login Admin</h2>
@@ -72,6 +86,41 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
+    // Tanggal dan waktu pengumuman dibuka
+    let waktuBuka = localStorage.getItem("waktuCountdown");
+if (!waktuBuka) {
+  waktuBuka = "2025-06-10T08:00:00"; // default jika belum diset
+}
+waktuBuka = new Date(waktuBuka);
+
+    const countdownContainer = document.getElementById("countdown-container");
+    const countdownDisplay = document.getElementById("countdown");
+    const loginForm = document.getElementById("login-siswa-form");
+
+    function updateCountdown() {
+      const now = new Date();
+      const selisih = waktuBuka - now;
+
+      if (selisih <= 0 || localStorage.getItem("adminLoggedIn") === "true") {
+  countdownContainer.style.display = "none";
+  loginForm.classList.remove("hidden");
+  clearInterval(interval);
+  return;
+}
+
+      const jam = Math.floor((selisih / (1000 * 60 * 60)) % 24);
+      const menit = Math.floor((selisih / (1000 * 60)) % 60);
+      const detik = Math.floor((selisih / 1000) % 60);
+
+      const hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
+countdownDisplay.textContent = `${hari.toString().padStart(2, '0')} hari ${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
+
+    }
+
+    const interval = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // Admin login logic
     const ADMIN_USERNAME = "admin";
     const ADMIN_PASSWORD = "12345678";
 
@@ -96,13 +145,14 @@
       }
     });
 
+    // Logout tombol
     const logoutBtn = document.getElementById('logout-btn');
     logoutBtn.addEventListener('click', () => {
       sessionStorage.removeItem('nisnLogin');
       sessionStorage.removeItem('tglLahirLogin');
       document.getElementById('hasilKelulusan').innerHTML = "";
       logoutBtn.classList.add('hidden');
-      document.getElementById('login-siswa-form').classList.remove('hidden');
+      loginForm.classList.remove('hidden');
     });
 
     function getDataSiswa() {
@@ -130,16 +180,16 @@
       sessionStorage.setItem("tglLahirLogin", tgl);
 
       const statusBox = siswa.lulus
-        ? `<div class="mt-2 inline-block px-4 py-2 rounded-lg bg-green-600 text-white font-bold text-lg">LULUS</div>
-           <p class="text-green-300 mt-4">Selamat atas kelulusanmu, tetap semangat meraih masa depan!</p>`
-        : `<div class="mt-2 inline-block px-4 py-2 rounded-lg bg-red-600 text-white font-bold text-lg">TIDAK LULUS</div>
-           <p class="text-red-300 mt-4">Tetap semangat, ini bukan akhir segalanya. Kesempatan masih terbuka luas!</p>`;
+        ? `<div class="mt-2 inline-block px-28 py-2 rounded-lg bg-green-600 text-white font-bold text-lg">LULUS</div>
+           <p class="text-green-350 mt-4">Selamat atas kelulusanmu, tetap semangat meraih masa depan!</p>`
+        : `<div class="mt-2 inline-block px-28 py-2 rounded-lg bg-red-600 text-white font-bold text-lg">TIDAK LULUS</div>
+           <p class="text-red-350 mt-4">Tetap semangat, ini bukan akhir segalanya. Kesempatan masih terbuka luas!</p>`;
 
       hasil.innerHTML = `
         <div class="bg-white text-gray-800 rounded-xl shadow-xl p-6 w-full text-center">
-          <h2 class="text-xl sm:text-2xl font-bold mb-2 capitalize">Halo, ${siswa.nama}</h2>
+          <h2 class="text-xl sm:text-4xl font-bold mb-2 capitalize">Halo, ${siswa.nama}</h2>
           <p class="text-gray-600">Nilai Akhir:</p>
-          <p class="text-3xl font-bold text-blue-700">${siswa.nilai}</p>
+          <p class="text-3xl font-bold text-blue-750">${siswa.nilai}</p>
           ${statusBox}
           <div class="mt-6 flex justify-center gap-2 flex-wrap">
             <button id="btnCetak" class="text-sm px-3 py-1.5 bg-blue-900 text-white rounded hover:bg-blue-800">Cetak</button>
@@ -149,7 +199,7 @@
       `;
 
       logoutBtn.classList.remove('hidden');
-      document.getElementById('login-siswa-form').classList.add('hidden');
+      loginForm.classList.add('hidden');
 
       document.getElementById('btnCetak').addEventListener('click', () => window.print());
 
