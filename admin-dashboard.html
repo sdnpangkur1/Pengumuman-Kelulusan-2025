@@ -1,198 +1,159 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
+  <link rel="icon" href="nw.png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database-compat.js"></script>
-</head>
-<body>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Dashboard - Kelulusan SDN PANGKUR</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      background-color: #0D1B2A;
-      background-image: 
-        repeating-linear-gradient(
-          45deg, 
-          rgba(255,255,255,0.05), 
-          rgba(255,255,255,0.05) 1px, 
-          transparent 1px, 
-          transparent 20px
-        ),
-        repeating-linear-gradient(
-          -45deg, 
-          rgba(255,255,255,0.05), 
-          rgba(255,255,255,0.05) 1px, 
-          transparent 1px, 
-          transparent 20px
-        );
-      color: white;
-      min-height: 100vh;
-      padding: 2rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #FBBF24;
-      padding: 0.5rem;
-      text-align: center;
-    }
-    th {
-      background-color: #FBBF24;
-      color: #0D1B2A;
-    }
-    .btn {
-      background-color: #FBBF24;
-      color: #0D1B2A;
-      font-weight: 600;
-      padding: 0.25rem 0.75rem;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      margin: 0 0.15rem;
-      transition: background-color 0.3s;
-    }
-    .btn:hover {
-      background-color: #F59E0B;
-    }
-    #btn-logout {
-      float: right;
-      margin-bottom: 1rem;
-      background-color: #DC2626;
-      color: white;
-    }
-    #btn-logout:hover {
-      background-color: #B91C1C;
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('city-background.png') center center / cover no-repeat;
+      opacity: 0.2;
+      z-index: -1;
     }
   </style>
+
 </head>
-<body>
-  <h1 class="text-yellow-400 text-3xl font-bold mb-6 text-center">
-    Admin Dashboard - Kelulusan SDN PANGKUR 1 & 2 Tahun 2025
-  </h1>
-
-  <button id="btn-logout" class="btn">Logout</button>
-  <button id="btn-tambah" class="btn mb-4">Tambah Data Siswa</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Nama</th>
-        <th>NISN</th>
-        <th>Tanggal Lahir (DDMMYYYY)</th>
-        <th>Nilai Akhir</th>
-        <th>Status Lulus</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody id="tbody-siswa"></tbody>
-  </table>
-
-  <!-- Pengaturan Waktu Countdown -->
-  <div class="bg-white text-gray-900 p-4 rounded shadow mt-8 max-w-md">
-    <h2 class="text-lg font-bold mb-2">Pengaturan Waktu Countdown</h2>
-    <form id="form-waktu">
-      <label class="block mb-1 font-medium">Waktu Buka Pengumuman:</label>
-      <input type="datetime-local" id="inputWaktu" required class="w-full p-2 rounded border mb-4" />
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan Waktu</button>
-    </form>
+<body class="bg-blue-900 text-white min-h-screen p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Dashboard Admin</h1>
+    <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded">Logout</button>
   </div>
 
-  <!-- Script untuk pengelolaan data dan countdown -->
+  <!-- Panel Atur Countdown -->
+  <div class="bg-blue-800 p-4 rounded-xl mb-6">
+    <h2 class="text-lg font-semibold mb-2">Atur Waktu Akses Kelulusan</h2>
+    <input type="datetime-local" id="waktuAksesInput" class="p-2 rounded text-black w-full max-w-sm mb-2">
+    <button onclick="simpanWaktuAkses()" class="bg-white text-blue-800 px-4 py-2 rounded">Simpan</button>
+    <div id="statusSimpanWaktu" class="text-sm mt-2"></div>
+  </div>
+
+  <!-- Form Tambah Siswa -->
+  <div class="bg-blue-800 p-4 rounded-xl mb-6">
+    <h2 class="text-lg font-semibold mb-2">Tambah Siswa</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <input id="tambahNISN" type="text" placeholder="NISN" class="p-2 rounded text-black">
+      <input id="tambahNama" type="text" placeholder="Nama Lengkap" class="p-2 rounded text-black">
+      <input id="tambahTanggal" type="text" placeholder="Tanggal Lahir (DDMMYYYY)" class="p-2 rounded text-black">
+      <input id="tambahNilai" type="number" placeholder="Nilai" class="p-2 rounded text-black">
+    </div>
+    <div class="mt-2">
+      <label><input type="checkbox" id="tambahLulus" class="mr-2">Lulus</label>
+    </div>
+    <button onclick="tambahSiswa()" class="mt-2 bg-white text-blue-800 px-4 py-2 rounded">Tambah</button>
+    <div id="statusTambah" class="text-sm mt-2"></div>
+  </div>
+
+  <!-- Tabel Data Siswa -->
+  <div class="overflow-x-auto">
+    <table class="table-auto w-full bg-blue-800 rounded-xl">
+      <thead>
+        <tr>
+          <th class="px-4 py-2">NISN</th>
+          <th class="px-4 py-2">Nama</th>
+          <th class="px-4 py-2">Tanggal Lahir</th>
+          <th class="px-4 py-2">Nilai</th>
+          <th class="px-4 py-2">Lulus</th>
+          <th class="px-4 py-2">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelSiswa"></tbody>
+    </table>
+  </div>
+
   <script>
-    // Cek login admin
-    if (localStorage.getItem("adminLoggedIn") !== "true") {
-      alert("Anda harus login sebagai admin terlebih dahulu.");
+    var firebaseConfig = {
+      apiKey: "AIzaSyDHGXTBAkCyxxsFkkeYAJ2znwsYd4tqhVo",
+      authDomain: "sdn-pangkur1.firebaseapp.com",
+      databaseURL: "https://sdn-pangkur1-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sdn-pangkur1",
+      storageBucket: "sdn-pangkur1.appspot.com",
+      messagingSenderId: "916172794638",
+      appId: "1:916172794638:web:8c50e0df42cc75aaa9c55f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function logout() {
+      localStorage.removeItem("admin");
       window.location.href = "index.html";
     }
 
-    function getDataSiswa() {
-      return JSON.parse(localStorage.getItem("dataSiswa")) || [];
-    }
-    function simpanDataSiswa(data) {
-      localStorage.setItem("dataSiswa", JSON.stringify(data));
+    function renderSiswa() {
+      db.ref("siswa").once("value", snap => {
+        const tbody = document.getElementById("tabelSiswa");
+        tbody.innerHTML = "";
+        snap.forEach(child => {
+          const data = child.val();
+          tbody.innerHTML += `
+            <tr>
+              <td class="border px-4 py-2">${child.key}</td>
+              <td class="border px-4 py-2">${data.nama}</td>
+              <td class="border px-4 py-2">${data.tanggal_lahir}</td>
+              <td class="border px-4 py-2">${data.nilai}</td>
+              <td class="border px-4 py-2">${data.lulus ? "Lulus" : "Tidak Lulus"}</td>
+              <td class="border px-4 py-2">
+                <button onclick="hapusSiswa('${child.key}')" class="bg-red-600 px-2 py-1 rounded text-sm">Hapus</button>
+              </td>
+            </tr>`;
+        });
+      });
     }
 
-    // Render tabel siswa
-    function renderTabel() {
-      const tbody = document.getElementById("tbody-siswa");
-      tbody.innerHTML = "";
-      const dataSiswa = getDataSiswa();
+    function tambahSiswa() {
+      const nisn = document.getElementById("tambahNISN").value.trim();
+      const nama = document.getElementById("tambahNama").value.trim();
+      const tanggal = document.getElementById("tambahTanggal").value.trim();
+      const nilai = parseFloat(document.getElementById("tambahNilai").value.trim());
+      const lulus = document.getElementById("tambahLulus").checked;
 
-      if (dataSiswa.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center">Belum ada data siswa.</td></tr>`;
+      if (!nisn || !nama || !tanggal || isNaN(nilai)) {
+        document.getElementById("statusTambah").textContent = "Mohon lengkapi semua data dengan benar.";
         return;
       }
 
-      dataSiswa.forEach((siswa, idx) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="capitalize">${siswa.nama}</td>
-          <td>${siswa.nisn}</td>
-          <td>${siswa.ttl}</td>
-          <td>${siswa.nilai}</td>
-          <td>${siswa.lulus ? "LULUS" : "TIDAK LULUS"}</td>
-          <td>
-            <button class="btn edit" data-idx="${idx}">Edit</button>
-            <button class="btn bg-red-600 hover:bg-red-500 text-white delete" data-idx="${idx}">Hapus</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      // Event edit
-      document.querySelectorAll(".edit").forEach(btn => {
-        btn.addEventListener("click", e => {
-          const idx = e.target.getAttribute("data-idx");
-          window.location.href = `form-siswa.html?edit=${idx}`;
-        });
-      });
-
-      // Event hapus
-      document.querySelectorAll(".delete").forEach(btn => {
-        btn.addEventListener("click", e => {
-          const idx = e.target.getAttribute("data-idx");
-          if (confirm("Yakin ingin menghapus data ini?")) {
-            let data = getDataSiswa();
-            data.splice(idx, 1);
-            simpanDataSiswa(data);
-            renderTabel();
-          }
-        });
+      db.ref("siswa/" + nisn).set({
+        nama: nama,
+        tanggal_lahir: tanggal,
+        nilai: nilai,
+        lulus: lulus
+      }, (error) => {
+        if (error) {
+          document.getElementById("statusTambah").textContent = "Gagal menambahkan data.";
+        } else {
+          document.getElementById("statusTambah").textContent = "Siswa berhasil ditambahkan.";
+          renderSiswa();
+        }
       });
     }
 
-    document.getElementById("btn-tambah").addEventListener("click", () => {
-      window.location.href = "form-siswa.html";
-    });
-
-    document.getElementById("btn-logout").addEventListener("click", () => {
-      localStorage.removeItem("adminLoggedIn");
-      window.location.href = "index.html";
-    });
-
-    renderTabel();
-
-    // Script pengaturan waktu countdown
-    const inputWaktu = document.getElementById('inputWaktu');
-    const waktuTersimpan = localStorage.getItem("waktuCountdown");
-    if (waktuTersimpan) {
-      inputWaktu.value = new Date(waktuTersimpan).toISOString().slice(0, 16);
+    function hapusSiswa(nisn) {
+      if (confirm("Yakin ingin menghapus data siswa ini?")) {
+        db.ref("siswa/" + nisn).remove(() => renderSiswa());
+      }
     }
 
-    document.getElementById("form-waktu").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const waktuBaru = new Date(inputWaktu.value).toISOString();
-      localStorage.setItem("waktuCountdown", waktuBaru);
-      alert("Waktu pengumuman berhasil diperbarui!");
-    });
+    function simpanWaktuAkses() {
+      const waktu = document.getElementById("waktuAksesInput").value;
+      if (!waktu) {
+        document.getElementById("statusSimpanWaktu").textContent = "Waktu tidak boleh kosong.";
+        return;
+      }
+      db.ref("pengaturan/waktu_akses").set(new Date(waktu).toISOString(), (error) => {
+        document.getElementById("statusSimpanWaktu").textContent = error ? "Gagal menyimpan." : "Waktu akses berhasil disimpan.";
+      });
+    }
+
+    // Auto load data siswa saat halaman dibuka
+    window.onload = renderSiswa;
   </script>
 </body>
 </html>

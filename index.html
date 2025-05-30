@@ -1,422 +1,164 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="shortcut icon" href="nw.png" type="image/x-icon" />
-  <title>Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PENGUMUMAN KELULUSAN SDN PANGKUR 1 TP. 2024/2025</title>
+  <link rel="icon" href="nw.png" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
   <style>
-    body {
-      background-color: #0D1B2A;
-      background-image:
-        repeating-linear-gradient(
-          45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px
-        ),
-        repeating-linear-gradient(
-          -45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px
-        );
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('city-background.png') center center / cover no-repeat;
+      opacity: 0.2;
+      z-index: -1;
     }
   </style>
+</head>
+<body class="bg-blue-900 bg-opacity-90 text-white min-h-screen flex flex-col justify-between relative">
+  <div class="p-4 sm:p-6 text-center">
+    <img src="logo.png" alt="Logo" class="mx-auto w-20 mb-4" />
+    <h1 class="text-2xl sm:text-3xl font-bold mb-2">
+      PENGUMUMAN KELULUSAN SDN PANGKUR 1 TP. 2024/2025
+    </h1>
+    <div id="countdown" class="mb-4 text-lg font-semibold"></div>
 
-  <!-- Firebase SDK versi 7 -->
-  <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
+    <!-- Form Login Siswa -->
+    <div id="loginForm" class="bg-blue-800 bg-opacity-95 p-6 rounded-xl w-full max-w-sm mx-auto hidden shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Login Siswa</h2>
+      <input id="nisn" type="text" placeholder="NISN"
+        class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <input id="tanggal" type="text" placeholder="Tanggal Lahir (DDMMYYYY)"
+        class="w-full p-2 mb-4 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <button onclick="loginSiswa()"
+        class="bg-white text-blue-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">Login</button>
+    </div>
+
+    <!-- Hasil Kelulusan -->
+    <div id="hasilKelulusan" class="hidden mt-6">
+      <div id="statusKelulusan" class="text-xl font-bold mb-4"></div>
+      <div id="nilaiSiswa" class="text-lg mb-2"></div>
+      <div class="text-sm mb-1">Nilai ambang batas: 70</div>
+      <div id="pesanKelulusan" class="text-md"></div>
+      <button onclick="logoutSiswa()" class="mt-4 bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
+    </div>
+  </div>
+
+  <!-- Tombol kecil login admin -->
+  <button onclick="openAdminLogin()" class="text-xs text-gray-300 absolute bottom-2 right-2 hover:underline">
+    Login Admin
+  </button>
+
+  <!-- Popup login admin -->
+  <div id="adminLoginPopup" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+    <div class="bg-blue-800 bg-opacity-95 p-6 rounded-xl w-full max-w-sm text-white relative shadow-xl">
+      <button onclick="closeAdminLogin()" class="absolute top-2 right-2 text-white hover:text-red-400">✖</button>
+      <h2 class="text-xl font-semibold mb-4">Login Admin</h2>
+      <input id="adminUsername" type="text" placeholder="Username"
+        class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <input id="adminPassword" type="password" placeholder="Password"
+        class="w-full p-2 mb-4 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <button onclick="loginAdmin()"
+        class="bg-white text-blue-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">Login</button>
+    </div>
+  </div>
+
+  <footer class="text-center p-4 text-sm bg-blue-800 mt-12">
+    &copy; Dinas Pendidikan dan Kebudayaan Kabupaten Ngawi
+  </footer>
 
   <script>
     // Konfigurasi Firebase
-    const firebaseConfig = {
+    var firebaseConfig = {
       apiKey: "AIzaSyDHGXTBAkCyxxsFkkeYAJ2znwsYd4tqhVo",
       authDomain: "sdn-pangkur1.firebaseapp.com",
-      databaseURL: "https://sdn-pangkur1-default-rtdb.firebaseio.com",
+      databaseURL: "https://sdn-pangkur1-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "sdn-pangkur1",
-      storageBucket: "sdn-pangkur1.firebasestorage.app",
+      storageBucket: "sdn-pangkur1.appspot.com",
       messagingSenderId: "916172794638",
-      appId: "1:916172794638:web:1b993b23cb18d4f0a9c55f",
-      measurementId: "G-EE2H5ZNX6M"
+      appId: "1:916172794638:web:8c50e0df42cc75aaa9c55f"
     };
-
-    // Inisialisasi Firebase versi 7 (namespace)
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-  </script>
-</head>
 
-<body class="min-h-screen flex flex-col items-center justify-center text-white p-4">
+    const ADMIN_CREDENTIALS = {
+      username: "admin",
+      password: "admin123"
+    };
 
-  <div class="mb-4">
-    <img src="logo.png" alt="Logo SDN PANGKUR 1" class="h-20 mx-auto" />
-  </div>
-
-  <h1 class="text-yellow-400 text-3xl font-bold mb-6 text-center">
-    PENGUMUMAN KELULUSAN<br />
-    SDN PANGKUR 1 & 2<br />
-    TAHUN 2025
-  </h1>
-
-  <div id="countdown-container" class="text-center mb-6">
-    <p class="text-yellow-400 text-lg font-semibold">Pengumuman akan dibuka dalam:</p>
-    <div id="countdown" class="text-3xl font-bold mt-2">--:--:--</div>
-  </div>
-
-  <form id="login-siswa-form" class="w-full max-w-md bg-[#0D1B2ACC] p-6 rounded-lg shadow-lg hidden">
-    <label class="block text-yellow-400 font-semibold mb-1">NISN</label>
-    <input id="nisn" type="text" maxlength="10" required placeholder="Masukkan NISN"
-      class="w-full p-2 rounded mb-4 text-black focus:outline-yellow-400" />
-
-    <label class="block text-yellow-400 font-semibold mb-1">Tanggal Lahir (DDMMYYYY)</label>
-    <input id="tglLahir" type="text" maxlength="8" required placeholder="Contoh: 15032010"
-      class="w-full p-2 rounded mb-6 text-black focus:outline-yellow-400" />
-
-    <button type="submit"
-      class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 rounded">
-      Cek Kelulusan
-    </button>
-  </form>
-
-  <div id="hasilKelulusan" class="mt-6 text-center w-full max-w-md"></div>
-
-  <div id="loading" class="hidden text-center mt-6">
-    <div
-      class="relative w-full max-w-md h-8 bg-green-200 rounded overflow-hidden mx-auto mb-4"
-      aria-label="Loading progress bar"
-      role="progressbar"
-    >
-      <div
-        id="loading-bar"
-        class="absolute top-0 left-0 h-full bg-green-500"
-        style="width: 0;"
-      >
-        <div
-          class="w-full h-full bg-green-600 opacity-30"
-          style="background-image: repeating-linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.3) 0,
-            rgba(255, 255, 255, 0.3) 5px,
-            transparent 5px,
-            transparent 10px
-          );"
-        ></div>
-      </div>
-    </div>
-    <p class="text-green-700 font-semibold">Memproses data kelulusan...</p>
-  </div>
-
-  <button id="logout-btn" class="hidden mt-4 bg-yellow-400 text-blue-900 font-semibold px-4 py-2 rounded hover:bg-yellow-300">
-    Logout
-  </button>
-
-  <button id="admin-login-btn" title="Login Admin"
-    class="fixed top-3 right-3 text-xs bg-yellow-400 text-blue-900 font-semibold px-2 py-1 rounded opacity-80 hover:opacity-100">
-    Admin
-  </button>
-
-  <div id="modal-admin-login" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-    <div class="bg-[#0D1B2A] p-6 rounded-lg w-full max-w-sm relative">
-      <h2 class="text-yellow-400 text-xl font-bold mb-4 text-center">Login Admin</h2>
-      <form id="admin-login-form">
-        <label class="block text-yellow-400 font-semibold mb-1">Username</label>
-        <input id="adminUsername" type="text" required
-          class="w-full mb-4 p-2 rounded text-black focus:outline-yellow-400" />
-        <label class="block text-yellow-400 font-semibold mb-1">Password</label>
-        <input id="adminPassword" type="password" required
-          class="w-full mb-6 p-2 rounded text-black focus:outline-yellow-400" />
-        <button type="submit"
-          class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 rounded">
-          Login
-        </button>
-      </form>
-      <button id="close-admin-modal" class="absolute top-2 right-3 text-yellow-400 font-bold text-lg">×</button>
-    </div>
-  </div>
-
-  <!-- FORM UPLOAD DATA SISWA UNTUK ADMIN (Tersembunyi, tampilkan hanya admin) -->
-  <div id="upload-siswa-container" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-    <div class="bg-[#0D1B2A] p-6 rounded-lg w-full max-w-md relative text-white">
-      <h2 class="text-yellow-400 text-xl font-bold mb-4 text-center">Upload Data Siswa</h2>
-      <form id="upload-siswa-form" class="space-y-4">
-        <div>
-          <label for="nama" class="block mb-1 font-semibold">Nama Lengkap</label>
-          <input id="nama" name="nama" type="text" required
-            class="w-full p-2 rounded text-black focus:outline-yellow-400" />
-        </div>
-        <div>
-          <label for="nisnUpload" class="block mb-1 font-semibold">NISN</label>
-          <input id="nisnUpload" name="nisnUpload" type="text" maxlength="10" required
-            class="w-full p-2 rounded text-black focus:outline-yellow-400" />
-        </div>
-        <div>
-          <label for="ttl" class="block mb-1 font-semibold">Tanggal Lahir (DDMMYYYY)</label>
-          <input id="ttl" name="ttl" type="text" maxlength="8" required placeholder="Contoh: 15032010"
-            class="w-full p-2 rounded text-black focus:outline-yellow-400" />
-        </div>
-        <div>
-          <label for="nilai" class="block mb-1 font-semibold">Nilai Akhir</label>
-          <input id="nilai" name="nilai" type="number" min="0" max="100" step="0.01" required
-            class="w-full p-2 rounded text-black focus:outline-yellow-400" />
-        </div>
-        <div>
-          <label for="lulus" class="block mb-1 font-semibold">Status Kelulusan</label>
-          <select id="lulus" name="lulus" required class="w-full p-2 rounded text-black focus:outline-yellow-400">
-            <option value="">-- Pilih Status --</option>
-            <option value="true">Lulus</option>
-            <option value="false">Tidak Lulus</option>
-          </select>
-        </div>
-        <div class="flex justify-between mt-4">
-          <button type="submit"
-            class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded">
-            Simpan Data
-          </button>
-          <button type="button" id="batal-upload"
-            class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded">
-            Batal
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <script>
-    // Countdown & tampilkan login siswa seperti kode Anda
-    let waktuBuka = localStorage.getItem("waktuCountdown");
-    if (!waktuBuka) {
-      // contoh: 29 Mei 2025 jam 10:00 WIB
-      const tglBuka = new Date(2025, 4, 29, 10, 0, 0); // bulan 0-based: 4=Mei
-      waktuBuka = tglBuka.getTime();
-      localStorage.setItem("waktuCountdown", waktuBuka);
-    } else {
-      waktuBuka = parseInt(waktuBuka);
-    }
-
+    const batasAkses = new Date("2025-06-10T08:00:00").getTime();
     const countdownEl = document.getElementById("countdown");
-    const countdownContainer = document.getElementById("countdown-container");
-    const loginForm = document.getElementById("login-siswa-form");
-    const hasilKelulusan = document.getElementById("hasilKelulusan");
-    const loadingDiv = document.getElementById("loading");
-    const logoutBtn = document.getElementById("logout-btn");
-    const adminLoginBtn = document.getElementById("admin-login-btn");
-    const modalAdminLogin = document.getElementById("modal-admin-login");
-    const closeAdminModalBtn = document.getElementById("close-admin-modal");
-    const adminLoginForm = document.getElementById("admin-login-form");
-    const uploadSiswaContainer = document.getElementById("upload-siswa-container");
-    const uploadSiswaForm = document.getElementById("upload-siswa-form");
-    const batalUploadBtn = document.getElementById("batal-upload");
+    const loginForm = document.getElementById("loginForm");
 
-    function updateCountdown() {
-      const now = Date.now();
-      const sisa = waktuBuka - now;
-
-      if (sisa <= 0) {
-        countdownContainer.style.display = "none";
-        loginForm.style.display = "block";
-        clearInterval(intervalCountdown);
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const selisih = batasAkses - now;
+      if (selisih <= 0) {
+        clearInterval(interval);
+        countdownEl.textContent = "Silakan login menggunakan NISN dan Tanggal Lahir";
+        loginForm.classList.remove("hidden");
       } else {
-        let detik = Math.floor(sisa / 1000) % 60;
-        let menit = Math.floor(sisa / (1000 * 60)) % 60;
-        let jam = Math.floor(sisa / (1000 * 60 * 60)) % 24;
-        let hari = Math.floor(sisa / (1000 * 60 * 60 * 24));
-        countdownEl.textContent = `${hari} Hari ${jam.toString().padStart(2, "0")}:${menit
-          .toString()
-          .padStart(2, "0")}:${detik.toString().padStart(2, "0")}`;
+        const jam = Math.floor(selisih / (1000 * 60 * 60));
+        const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
+        const detik = Math.floor((selisih % (1000 * 60)) / 1000);
+        countdownEl.textContent = `Akses dibuka dalam ${jam}j ${menit}m ${detik}d`;
       }
-    }
+    }, 1000);
 
-    const intervalCountdown = setInterval(updateCountdown, 1000);
-    updateCountdown();
-
-    // Fungsi validasi NISN dan tanggal lahir siswa
-    loginForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const nisnInput = document.getElementById("nisn").value.trim();
-      const tglLahirInput = document.getElementById("tglLahir").value.trim();
-
-      if (nisnInput.length === 0 || tglLahirInput.length !== 8) {
-        alert("Mohon isi NISN dan Tanggal Lahir dengan benar!");
-        return;
-      }
-
-      loadingDiv.classList.remove("hidden");
-      hasilKelulusan.innerHTML = "";
-
-      // Ambil data siswa dari Firebase Realtime Database
-      db.ref("dataSiswa/" + nisnInput)
-        .once("value")
-        .then((snapshot) => {
-          loadingDiv.classList.add("hidden");
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            if (data.ttl === tglLahirInput) {
-              // Tanggal lahir cocok, tampilkan hasil
-              tampilkanHasil(data);
-              loginForm.style.display = "none";
-              logoutBtn.style.display = "inline-block";
-              localStorage.setItem("nisnLogin", nisnInput);
-              localStorage.setItem("ttlLogin", tglLahirInput);
-            } else {
-              alert("Tanggal lahir tidak sesuai.");
-            }
-          } else {
-            alert("Data siswa tidak ditemukan.");
-          }
-        })
-        .catch((error) => {
-          loadingDiv.classList.add("hidden");
-          alert("Terjadi kesalahan: " + error.message);
-        });
-    });
-
-    // Fungsi tampilkan hasil kelulusan dan tombol cetak PDF
-    function tampilkanHasil(data) {
-      const status = data.lulus === "true" || data.lulus === true;
-      hasilKelulusan.innerHTML = `
-        <div class="bg-yellow-400 text-blue-900 rounded p-6 shadow-lg">
-          <h2 class="text-2xl font-bold mb-2">${data.nama}</h2>
-          <p class="mb-1">NISN: ${data.nisn}</p>
-          <p class="mb-1">Tanggal Lahir: ${data.ttl}</p>
-          <p class="mb-1">Nilai Akhir: ${data.nilai}</p>
-          <p class="mb-4 font-bold ${status ? 'text-green-700' : 'text-red-700'}">Status: ${status ? 'LULUS' : 'TIDAK LULUS'}</p>
-          <button id="btnCetakPdf" class="bg-blue-900 text-yellow-400 px-4 py-2 rounded font-semibold hover:bg-blue-800">Cetak PDF</button>
-        </div>
-      `;
-
-      document.getElementById("btnCetakPdf").addEventListener("click", () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        doc.setFontSize(16);
-        doc.setTextColor("#0D1B2A");
-        doc.text("Pengumuman Kelulusan SDN PANGKUR 1 & 2 Tahun 2025", 20, 20);
-
-        doc.setFontSize(14);
-        doc.setTextColor("#FBBF24"); // kuning
-        doc.text(`Nama: ${data.nama}`, 20, 40);
-        doc.text(`NISN: ${data.nisn}`, 20, 50);
-        doc.text(`Tanggal Lahir: ${data.ttl}`, 20, 60);
-        doc.text(`Nilai Akhir: ${data.nilai}`, 20, 70);
-
-        const statusText = status ? "LULUS" : "TIDAK LULUS";
-        doc.setTextColor(status ? "#22C55E" : "#DC2626"); // hijau atau merah
-        doc.text(`Status: ${statusText}`, 20, 80);
-
-        doc.save(`Kelulusan_${data.nisn}.pdf`);
+    function loginSiswa() {
+      const nisn = document.getElementById("nisn").value;
+      const tanggal = document.getElementById("tanggal").value;
+      db.ref("siswa/" + nisn).once("value", snap => {
+        if (snap.exists() && snap.val().tanggal_lahir === tanggal) {
+          const data = snap.val();
+          loginForm.classList.add("hidden");
+          setTimeout(() => {
+            document.getElementById("hasilKelulusan").classList.remove("hidden");
+            document.getElementById("statusKelulusan").innerHTML = data.lulus
+              ? '<div class="bg-green-600 p-6 rounded-xl shadow">SELAMAT ANDA DINYATAKAN LULUS</div>'
+              : '<div class="bg-red-700 p-6 rounded-xl shadow">MAAF, ANDA DINYATAKAN TIDAK LULUS</div>';
+            document.getElementById("nilaiSiswa").textContent = "Nilai Anda: " + data.nilai;
+            document.getElementById("pesanKelulusan").textContent = data.lulus
+              ? "Selamat dan sukses untuk jenjang selanjutnya!"
+              : "Tetap semangat, masih ada banyak kesempatan untuk belajar!";
+          }, 1500);
+        } else {
+          alert("Data tidak ditemukan atau salah!");
+        }
       });
     }
 
-    // Logout siswa
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("nisnLogin");
-      localStorage.removeItem("ttlLogin");
-      hasilKelulusan.innerHTML = "";
-      loginForm.style.display = "block";
-      logoutBtn.style.display = "none";
-    });
+    function logoutSiswa() {
+      document.getElementById("hasilKelulusan").classList.add("hidden");
+      loginForm.classList.remove("hidden");
+      document.getElementById("nisn").value = "";
+      document.getElementById("tanggal").value = "";
+    }
 
-    // Cek session login siswa
-    window.addEventListener("load", () => {
-      const nisnLogin = localStorage.getItem("nisnLogin");
-      const ttlLogin = localStorage.getItem("ttlLogin");
+    function openAdminLogin() {
+      document.getElementById("adminLoginPopup").classList.remove("hidden");
+    }
 
-      if (nisnLogin && ttlLogin) {
-        // Auto login, langsung tampilkan hasil
-        db.ref("dataSiswa/" + nisnLogin)
-          .once("value")
-          .then((snapshot) => {
-            if (snapshot.exists()) {
-              const data = snapshot.val();
-              if (data.ttl === ttlLogin) {
-                tampilkanHasil(data);
-                loginForm.style.display = "none";
-                logoutBtn.style.display = "inline-block";
-                countdownContainer.style.display = "none";
-              } else {
-                localStorage.removeItem("nisnLogin");
-                localStorage.removeItem("ttlLogin");
-                loginForm.style.display = "block";
-                logoutBtn.style.display = "none";
-              }
-            } else {
-              localStorage.removeItem("nisnLogin");
-              localStorage.removeItem("ttlLogin");
-              loginForm.style.display = "block";
-              logoutBtn.style.display = "none";
-            }
-          });
-      }
-    });
+    function closeAdminLogin() {
+      document.getElementById("adminLoginPopup").classList.add("hidden");
+    }
 
-    // Admin login modal toggle
-    adminLoginBtn.addEventListener("click", () => {
-      modalAdminLogin.classList.remove("hidden");
-    });
-    closeAdminModalBtn.addEventListener("click", () => {
-      modalAdminLogin.classList.add("hidden");
-      adminLoginForm.reset();
-    });
+    function loginAdmin() {
+      const username = document.getElementById("adminUsername").value;
+      const password = document.getElementById("adminPassword").value;
 
-    // Admin login (contoh hardcoded username & password)
-    adminLoginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const username = document.getElementById("adminUsername").value.trim();
-      const password = document.getElementById("adminPassword").value.trim();
-
-      // Ganti dengan validasi admin sesungguhnya jika perlu
-      if (username === "admin" && password === "password123") {
-        modalAdminLogin.classList.add("hidden");
-        adminLoginForm.reset();
-        adminLoginBtn.style.display = "none";
-        uploadSiswaContainer.classList.remove("hidden");
+      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        localStorage.setItem("admin", true);
+        window.location.href = "admin-dashboard.html";
       } else {
-        alert("Username atau password admin salah.");
+        alert("Username atau password salah");
       }
-    });
-
-    batalUploadBtn.addEventListener("click", () => {
-      uploadSiswaContainer.classList.add("hidden");
-      uploadSiswaForm.reset();
-      adminLoginBtn.style.display = "inline-block";
-    });
-
-    // Upload data siswa ke Firebase Realtime Database
-    uploadSiswaForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const nama = document.getElementById("nama").value.trim();
-      const nisnUpload = document.getElementById("nisnUpload").value.trim();
-      const ttl = document.getElementById("ttl").value.trim();
-      const nilai = parseFloat(document.getElementById("nilai").value.trim());
-      const lulus = document.getElementById("lulus").value;
-
-      if (!nama || !nisnUpload || ttl.length !== 8 || isNaN(nilai) || (lulus !== "true" && lulus !== "false")) {
-        alert("Mohon isi data dengan benar.");
-        return;
-      }
-
-      const dataBaru = {
-        nama: nama,
-        nisn: nisnUpload,
-        ttl: ttl,
-        nilai: nilai,
-        lulus: lulus,
-      };
-
-      db.ref("dataSiswa/" + nisnUpload)
-        .set(dataBaru)
-        .then(() => {
-          alert("Data siswa berhasil disimpan.");
-          uploadSiswaForm.reset();
-          uploadSiswaContainer.classList.add("hidden");
-          adminLoginBtn.style.display = "inline-block";
-        })
-        .catch((error) => {
-          alert("Gagal menyimpan data: " + error.message);
-        });
-    });
+    }
   </script>
-
 </body>
-
 </html>
