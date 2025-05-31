@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <meta property="og:title" content="Pengumuman Kelulusan SDN Pangkur 1" />
+<meta property="og:description" content="Selamat! Cek pengumuman kelulusan SDN Pangkur 1 Tahun 2025 di sini." />
+<meta property="og:image" content="https://sdnpangkur1.web.app/images/kelulusan2025.jpg" />
+<meta property="og:url" content="https://sdnpangkur1.web.app" />
+<meta property="og:type" content="website" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sambutan Kepala Sekolah</title>
+  <title>PENGUMUMAN KELULUSAN SDN PANGKUR 1 TAHUN 2025</title>
   <link rel="icon" href="nw.png" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
   <style>
     body::before {
       content: "";
@@ -16,57 +26,373 @@
       opacity: 0.2;
       z-index: -1;
     }
+    
   </style>
 </head>
-<body class="bg-blue-900 text-white min-h-screen flex items-center justify-center px-4">
-  <div class="w-full max-w-md sm:max-w-lg md:max-w-3xl bg-white text-gray-900 rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 space-y-6">
+<body class="bg-blue-900 bg-opacity-90 text-white min-h-screen flex flex-col justify-between relative">
+  <div class="p-4 sm:p-6 text-center">
+    <img src="logo.png" alt="Logo" class="mx-auto w-20 mb-4" />
+    <h1 id="judulUtama" class="text-3xl sm:text-3xl font-extrabold text-yellow-300 mb-2">
+  PENGUMUMAN KELULUSAN<br> SDN PANGKUR 1<br> TAHUN 2025
+</h1>
+<p id="loginInstruction" class="text-white text-lg text-center mb-4 hidden">
+  Silakan login menggunakan NISN dan Tanggal Lahir
+</p>
+    <div id="countdown" class="bg-red-500 py-2 rounded-lg w-full max-w-md mx-auto text-white-400 text-lg font-semibold mt-12"></div>
+
     
-    <img src="logo.png" alt="Logo Sekolah" class="mx-auto w-16 sm:w-20 mb-2 sm:mb-4">
+    <!-- Form Login Siswa -->
+    <div id="loginForm" class="bg-blue-800 bg-opacity-95 p-6 rounded-xl w-full max-w-sm mx-auto hidden shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Login Siswa</h2>
+      <input id="nisn" type="text" placeholder="NISN"
+        class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <div class="relative mb-4">
+ <input id="tanggal" type="password" placeholder="Tanggal Lahir (DDMMYYYY)"
+  inputmode="numeric" pattern="[0-9]*"
+  class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+<script>
+  document.getElementById("tanggal").addEventListener("input", function (e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+</script>
+  <button type="button" onclick="toggleTanggal()" class="absolute inset-y-0 right-2 flex items-center">
+    <svg id="eyeTanggalIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+      viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
+    </svg>
+  </button>
+</div>
 
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-      <div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8">
-        
-        <!-- Foto Kepala Sekolah -->
-        <div class="md:order-2 w-full md:w-1/3">
-          <img src="foto-kepala-sekolah.jpg" alt="Kepala Sekolah"
-            class="w-28 sm:w-32 md:w-full rounded-xl mx-auto md:mx-0">
-        </div>
+      <button id="loginBtn" onclick="loginSiswa()"
+  class="bg-yellow-400 text-blue-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">
+  Login
+</button>
 
-        <!-- Teks Sambutan -->
-        <div class="md:order-1 w-full md:w-2/3 space-y-3 text-sm sm:text-base">
-          <h1 class="text-lg text-center sm:text-xl md:text-2xl font-bold text-blue-900">Sambutan Kepala Sekolah</h1>
-          <p class="text-justify">
-            Assalamu’alaikum warahmatullahi wabarakatuh. <br><br>
-            Puji syukur kita panjatkan ke hadirat Allah Swt. yang telah melimpahkan rahmat dan karunia-Nya sehingga kita dapat menyelesaikan tahun pelajaran 2024/2025 dengan baik.
-Dengan penuh rasa bangga, saya mengumumkan kelulusan siswa-siswi kelas VI SD Negeri Pangkur 1. Pencapaian ini merupakan hasil dari kerja keras dan dedikasi para siswa, dukungan orang tua, serta bimbingan seluruh bapak ibu guru.
-Selamat kepada seluruh siswa yang telah dinyatakan lulus. Semoga kesuksesan senantiasa menyertai langkah kalian dalam menempuh jenjang pendidikan berikutnya.<br><br>
-Wassalamu’alaikum warahmatullahi wabarakatuh.<br><br>
-          </p>
-          <p class="text-right font-semibold">Kepala Sekolah SDN Pangkur 1 & 2,<br><span class="font-bold text-2xl">Anik Kusrianti, S.Pd., M.Pd.</span></p>
-        </div>
+    
+  <!-- Loading Progress Bar (hidden awalnya) -->
+<div id="loadingBar" class="hidden w-full max-w-sm mx-auto mt-6">
+  <div class="w-full bg-gray-300 rounded-full h-4 overflow-hidden">
+    <div class="bg-yellow-400 h-full animate-pulseBar"></div>
+  </div>
+  <div class="mt-2 text-sm text-white-700">Menyiapkan data kelulusan...</div>
+</div>
+
+<style>
+  @keyframes pulseBar {
+    0% {
+      width: 0%;
+      background-position: 0 0;
+    }
+    100% {
+      width: 100%;
+      background-position: 100px 0; /* geser background */
+    }
+  }
+
+  .animate-pulseBar {
+    animation-name: pulseBar;
+    animation-duration: 15s;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+
+    background-color: #10B981; /* hijau emerald */
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 0px,
+      rgba(255, 255, 255, 0.15) 10px,
+      transparent 10px,
+      transparent 20px
+    );
+    background-size: 40px 40px;
+    background-repeat: repeat;
+  }
+
+  .hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  const loginBtn = document.getElementById('loginBtn');
+  const loadingBar = document.getElementById('loadingBar');
+
+</script>
+</style>
+
       </div>
-    </div>
-</body>
 
-  <!-- Tombol Berikutnya -->
-  <div class="text-center md:text-right mt-6">
-    <button onclick="lanjutKeBeranda()" class="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2 px-6 rounded-full transition">
-      Berikutnya
+    <!-- Hasil Kelulusan -->
+    <div id="hasilKelulusan" class="hidden mt-6">
+  <div id="namaSiswa" class="text-2xl font-bold text-white-300 mb-8"></div>
+  <div id="statusKelulusan" class="text-xl font-bold mb-4"></div>
+  <div id="nilaiSiswa" class="text-xl text-yellow-300 font-bold mb-6"></div>
+  <div class="text-sm mb-1">Nilai ambang batas: 70</div>
+  <div id="pesanKelulusan" class="text-md"></div>
+  <button onclick="logoutSiswa()" class="mt-4 bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
+</div>
+
+ <!-- Tombol titik tiga di pojok kiri atas -->
+<button
+  onclick="toggleAdminLogin()"
+  class="fixed top-4 left-4 z-25 text-yellow-300 text-sm bg-blue-950 bg-opacity-80 w-6 h-6 flex items-center justify-center rounded-full opacity-90 hover:opacity-100"
+  aria-label="Admin Login"
+>
+  ⋮
+</button>
+
+<!-- Popup login admin -->
+<div id="adminLoginPopup" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50">
+  <div class="bg-blue-800 bg-opacity-95 p-6 rounded-xl w-full max-w-sm text-white relative shadow-xl">
+    <button onclick="closeAdminLogin()" class="absolute top-2 right-2 text-white hover:text-red-400">✖</button>
+    <h2 class="text-xl font-semibold mb-4">Login Admin</h2>
+    <input id="adminUsername" type="text" placeholder="Username"
+      class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+    <div class="relative mb-4">
+      <input id="adminPassword" type="password" placeholder="Password"
+        class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <button type="button" onclick="toggleAdminPassword()" class="absolute inset-y-0 right-2 flex items-center">
+        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
+        </svg>
+      </button>
+    </div>
+    <button
+      onclick="loginAdmin()"
+      class="w-full bg-yellow-300 text-blue-900 py-2 rounded font-semibold hover:bg-yellow-400"
+    >
+      Login
     </button>
   </div>
 </div>
 
+<!-- Tempatkan script di akhir body atau di head dengan defer -->
+<script>
+  function toggleAdminLogin() {
+    const popup = document.getElementById("adminLoginPopup");
+    popup.classList.toggle("hidden");
+  }
+
+  function closeAdminLogin() {
+    document.getElementById("adminLoginPopup").classList.add("hidden");
+  }
+
+  function toggleAdminPassword() {
+    const pwd = document.getElementById("adminPassword");
+    const eyeIcon = document.getElementById("eyeIcon");
+    if (pwd.type === "password") {
+      pwd.type = "text";
+      eyeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 012.36-3.473m1.88-1.879A9.97 9.97 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.96 9.96 0 01-4.134 5.7M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />
+      `;
+    } else {
+      pwd.type = "password";
+      eyeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
+      `;
+    }
+  }
+
+  function loginAdmin() {
+    // fungsi login admin, contoh:
+    const username = document.getElementById("adminUsername").value;
+    const password = document.getElementById("adminPassword").value;
+    if (username === "admin" && password === "password123") {
+      alert("Login berhasil!");
+      closeAdminLogin();
+      // lakukan navigasi ke halaman admin, dll.
+    } else {
+      alert("Username atau password salah!");
+    }
+  }
+</script>
 
 
-    
+
+  <footer class="fixed bottom-0 w-full text-center text-xs py-2">
+    &copy; Dinas Pendidikan dan Kebudayaan Kabupaten Ngawi
+  </footer>
 
   <script>
-    function lanjutKeBeranda() {
-      window.location.href = "index.html";
-    }
-  </script>
-</body>
+    // Konfigurasi Firebase
+    var firebaseConfig = {
+      apiKey: "AIzaSyDHGXTBAkCyxxsFkkeYAJ2znwsYd4tqhVo",
+      authDomain: "sdn-pangkur1.firebaseapp.com",
+      databaseURL: "https://sdn-pangkur1-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sdn-pangkur1",
+      storageBucket: "sdn-pangkur1.appspot.com",
+      messagingSenderId: "916172794638",
+      appId: "1:916172794638:web:8c50e0df42cc75aaa9c55f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  
+    const ADMIN_CREDENTIALS = {
+      username: "admin",
+      password: "admin123"
+    };
+
+    const countdownEl = document.getElementById("countdown");
+  const loginForm = document.getElementById("loginForm");
+
+  // Ambil waktu akses dari Realtime Database
+  db.ref("pengaturan/waktu_akses").once("value", snap => {
+    if (snap.exists()) {
+      const waktuAkses = new Date(snap.val()).getTime();
+      mulaiCountdown(waktuAkses);
+    } else {
+      countdownEl.textContent = "Waktu akses belum diatur oleh admin.";
+    }
+  });
+
+  function mulaiCountdown(batasAkses) {
+  const interval = setInterval(() => {
+    const sekarang = new Date().getTime();
+    const selisih = batasAkses - sekarang;
+    const countdownEl = document.getElementById("countdown"); // pastikan ID-nya benar
+    const loginForm = document.getElementById("loginForm");
+    const loginInstruction = document.getElementById("loginInstruction");
+
+    if (selisih <= 0) {
+      clearInterval(interval);
+  countdownEl.textContent = "";
+  countdownEl.classList.add("hidden"); // 👉 ini akan menyembunyikan elemen
+  loginForm.classList.remove("hidden");
+  loginInstruction.classList.remove("hidden"); // 👈 Tampilkan instruksi login
+    } else {
+      const Hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
+    const jam = Math.floor((selisih % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
+    const detik = Math.floor((selisih % (1000 * 60)) / 1000);
+
+    countdownEl.innerHTML = `
+  <div class="text-sm">PENGUMUMAN BISA DIAKSES DALAM :</div>
+  <div class="font-bold text-lg">${Hari} HARI ${jam} JAM ${menit} MENIT ${detik} DETIK</div>
+`;
+
+  }
+}, 1000);
+}
+
+
+   function loginSiswa() {
+  const nisn = document.getElementById("nisn").value;
+  const tanggal = document.getElementById("tanggal").value;
+  const loginForm = document.getElementById("loginForm");
+  const loadingBar = document.getElementById("loadingBar");
+  const loginBtn = document.getElementById("loginBtn");
+
+  // Tampilkan loading bar
+  loadingBar.classList.remove("hidden");
+  loginBtn.disabled = true;
+
+  // Ambil data siswa dari Firebase
+  db.ref("siswa/" + nisn).once("value", snap => {
+    if (snap.exists() && snap.val().tanggal_lahir === tanggal) {
+      const data = snap.val();
+
+      document.getElementById("judulUtama").textContent = "HASIL KELULUSAN SDN PANGKUR 1 TAHUN 2025";
+      document.getElementById("namaSiswa").textContent = data.nama;
+
+      setTimeout(() => {
+        loadingBar.classList.add("hidden");
+        loginBtn.disabled = false;
+
+        loginForm.classList.add("hidden");
+        document.getElementById("loginInstruction").classList.add("hidden");
+        document.getElementById("hasilKelulusan").classList.remove("hidden");
+
+        document.getElementById("statusKelulusan").innerHTML = data.lulus
+          ? '<div class="bg-green-600 p-6 rounded-xl shadow">SELAMAT ANDA DINYATAKAN LULUS</div>'
+          : '<div class="bg-red-700 p-6 rounded-xl shadow">MAAF, ANDA DINYATAKAN TIDAK LULUS</div>';
+        document.getElementById("nilaiSiswa").textContent = "Nilai Anda: " + data.nilai;
+        document.getElementById("pesanKelulusan").textContent = data.lulus
+          ? "Selamat dan sukses untuk jenjang selanjutnya!"
+          : "Tetap semangat, masih ada banyak kesempatan untuk belajar!";
+      }, 15000); // loading animasi delay
+    } else {
+      loadingBar.classList.add("hidden");
+      loginBtn.disabled = false;
+      alert("Data tidak ditemukan atau salah!");
+    }
+  });
+}
+
+
+    function logoutSiswa() {
+      document.getElementById("hasilKelulusan").classList.add("hidden");
+      loginForm.classList.remove("hidden");
+      document.getElementById("nisn").value = "";
+      document.getElementById("tanggal").value = "";
+    }
+
+    function openAdminLogin() {
+      document.getElementById("adminLoginPopup").classList.remove("hidden");
+    }
+
+    function closeAdminLogin() {
+      document.getElementById("adminLoginPopup").classList.add("hidden");
+    }
+
+    function loginAdmin() {
+      const username = document.getElementById("adminUsername").value;
+      const password = document.getElementById("adminPassword").value;
+
+      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        localStorage.setItem("admin", true);
+        window.location.href = "admin-dashboard.html";
+      } else {
+        alert("Username atau password salah");
+      }
+    }
+
+function toggleAdminPassword() {
+  const input = document.getElementById("adminPassword");
+  const icon = document.getElementById("eyeIcon");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.965 9.965 0 012.665-4.178m2.1-1.502A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.955 9.955 0 01-4.42 5.336M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3l8 8m-8-8L4 20" />`;
+  } else {
+    input.type = "password";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />`;
+  }
+}
+
+function toggleTanggal() {
+  const input = document.getElementById("tanggal");
+  const icon = document.getElementById("eyeTanggalIcon");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.965 9.965 0 012.665-4.178m2.1-1.502A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.955 9.955 0 01-4.42 5.336M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3l8 8m-8-8L4 20" />`;
+  } else {
+    input.type = "password";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />`;
+  }
+}
+  </script>
 </body>
 </html>
