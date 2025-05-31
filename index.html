@@ -275,7 +275,11 @@
     const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
     const detik = Math.floor((selisih % (1000 * 60)) / 1000);
 
-    countdownEl.textContent = `COUNTDOWN : ${Hari} HARI ${jam} JAM ${menit} MENIT ${detik} DETIK`;
+    countdownEl.innerHTML = `
+  <div class="text-sm">PENGUMUMAN BISA DIAKSES DALAM :</div>
+  <div class="font-bold text-lg">${Hari} HARI ${jam} JAM ${menit} MENIT ${detik} DETIK</div>
+`;
+
   }
 }, 1000);
 }
