@@ -6,6 +6,9 @@
 <meta property="og:image" content="https://sdnpangkur1.web.app/images/kelulusan2025.jpg" />
 <meta property="og:url" content="https://sdnpangkur1.web.app" />
 <meta property="og:type" content="website" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PENGUMUMAN KELULUSAN SDN PANGKUR 1 TAHUN 2025</title>
@@ -44,8 +47,14 @@
       <input id="nisn" type="text" placeholder="NISN"
         class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
       <div class="relative mb-4">
-  <input id="tanggal" type="password" placeholder="Tanggal Lahir (DDMMYYYY)"
-    class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+ <input id="tanggal" type="password" placeholder="Tanggal Lahir (DDMMYYYY)"
+  inputmode="numeric" pattern="[0-9]*"
+  class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+<script>
+  document.getElementById("tanggal").addEventListener("input", function (e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+</script>
   <button type="button" onclick="toggleTanggal()" class="absolute inset-y-0 right-2 flex items-center">
     <svg id="eyeTanggalIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
       viewBox="0 0 24 24" stroke="currentColor">
@@ -110,20 +119,6 @@
   const loginBtn = document.getElementById('loginBtn');
   const loadingBar = document.getElementById('loadingBar');
 
-  loginBtn.addEventListener('click', () => {
-    // Tampilkan loading bar
-    loadingBar.classList.remove('hidden');
-
-    // Optional: disable tombol login agar tidak bisa diklik berulang kali
-    loginBtn.disabled = true;
-
-          // Sembunyikan loading bar lagi
-      loadingBar.classList.add('hidden');
-
-      // Aktifkan kembali tombol login
-      loginBtn.disabled = false;
-    }, 3000);
- ;
 </script>
 </style>
 
@@ -139,37 +134,90 @@
   <button onclick="logoutSiswa()" class="mt-4 bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
 </div>
 
-  <!-- Tombol kecil login admin -->
-  <button onclick="openAdminLogin()"
-  class="text-xs text-yellow-300 fixed bottom-4 right-4 z-50 bg-blue-950 bg-opacity-80 px-2 py-1 rounded-lg opacity-90 hover:opacity-100 mb-2">
-  Login Admin
+ <!-- Tombol titik tiga di pojok kiri atas -->
+<button
+  onclick="toggleAdminLogin()"
+  class="fixed top-4 left-4 z-25 text-yellow-300 text-sm bg-blue-950 bg-opacity-80 w-6 h-6 flex items-center justify-center rounded-full opacity-90 hover:opacity-100"
+  aria-label="Admin Login"
+>
+  ⋮
 </button>
 
-  <!-- Popup login admin -->
-  <div id="adminLoginPopup" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-    <div class="bg-blue-800 bg-opacity-95 p-6 rounded-xl w-full max-w-sm text-white relative shadow-xl">
-      <button onclick="closeAdminLogin()" class="absolute top-2 right-2 text-white hover:text-red-400">✖</button>
-      <h2 class="text-xl font-semibold mb-4">Login Admin</h2>
-      <input id="adminUsername" type="text" placeholder="Username"
-        class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
-     <div class="relative mb-4">
-  <input id="adminPassword" type="password" placeholder="Password"
-    class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
-  <button type="button" onclick="toggleAdminPassword()" class="absolute inset-y-0 right-2 flex items-center">
-    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
-      viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
-    </svg>
-  </button>
+<!-- Popup login admin -->
+<div id="adminLoginPopup" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50">
+  <div class="bg-blue-800 bg-opacity-95 p-6 rounded-xl w-full max-w-sm text-white relative shadow-xl">
+    <button onclick="closeAdminLogin()" class="absolute top-2 right-2 text-white hover:text-red-400">✖</button>
+    <h2 class="text-xl font-semibold mb-4">Login Admin</h2>
+    <input id="adminUsername" type="text" placeholder="Username"
+      class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+    <div class="relative mb-4">
+      <input id="adminPassword" type="password" placeholder="Password"
+        class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <button type="button" onclick="toggleAdminPassword()" class="absolute inset-y-0 right-2 flex items-center">
+        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
+        </svg>
+      </button>
+    </div>
+    <button
+      onclick="loginAdmin()"
+      class="w-full bg-yellow-300 text-blue-900 py-2 rounded font-semibold hover:bg-yellow-400"
+    >
+      Login
+    </button>
+  </div>
 </div>
 
-      <button onclick="loginAdmin()"
-        class="bg-yellow-400 text-white-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">Login</button>
-    </div>
-  </div>
+<!-- Tempatkan script di akhir body atau di head dengan defer -->
+<script>
+  function toggleAdminLogin() {
+    const popup = document.getElementById("adminLoginPopup");
+    popup.classList.toggle("hidden");
+  }
+
+  function closeAdminLogin() {
+    document.getElementById("adminLoginPopup").classList.add("hidden");
+  }
+
+  function toggleAdminPassword() {
+    const pwd = document.getElementById("adminPassword");
+    const eyeIcon = document.getElementById("eyeIcon");
+    if (pwd.type === "password") {
+      pwd.type = "text";
+      eyeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 012.36-3.473m1.88-1.879A9.97 9.97 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.96 9.96 0 01-4.134 5.7M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />
+      `;
+    } else {
+      pwd.type = "password";
+      eyeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
+      `;
+    }
+  }
+
+  function loginAdmin() {
+    // fungsi login admin, contoh:
+    const username = document.getElementById("adminUsername").value;
+    const password = document.getElementById("adminPassword").value;
+    if (username === "admin" && password === "password123") {
+      alert("Login berhasil!");
+      closeAdminLogin();
+      // lakukan navigasi ke halaman admin, dll.
+    } else {
+      alert("Username atau password salah!");
+    }
+  }
+</script>
+
+
 
   <footer class="fixed bottom-0 w-full text-center text-xs py-2">
     &copy; Dinas Pendidikan dan Kebudayaan Kabupaten Ngawi
@@ -341,7 +389,6 @@ function toggleTanggal() {
         d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />`;
   }
 }
-
   </script>
 </body>
 </html>
