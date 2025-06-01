@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta property="og:title" content="Pengumuman Kelulusan SDN Pangkur 1" />
-<meta property="og:description" content="Selamat! Cek pengumuman kelulusan SDN Pangkur 1 Tahun 2025 di sini." />
+  <meta property="og:title" content="Pengumuman Kelulusan SDN Pangkur 1 & 2" />
+<meta property="og:description" content="Selamat! Cek pengumuman kelulusan SDN Pangkur 1 & 2 Tahun 2025 di sini." />
 <meta property="og:image" content="https://sdnpangkur1.web.app/images/kelulusan2025.jpg" />
 <meta property="og:url" content="https://sdnpangkur1.web.app" />
 <meta property="og:type" content="website" />
@@ -11,7 +11,7 @@
 <meta http-equiv="Expires" content="0" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PENGUMUMAN KELULUSAN SDN PANGKUR 1 TAHUN 2025</title>
+  <title>PENGUMUMAN KELULUSAN SDN PANGKUR 1 & 2 TAHUN 2025</title>
   <link rel="icon" href="nw.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
@@ -33,7 +33,7 @@
   <div class="p-4 sm:p-6 text-center">
     <img src="logo.png" alt="Logo" class="mx-auto w-20 mb-4" />
     <h1 id="judulUtama" class="text-3xl sm:text-3xl font-extrabold text-yellow-300 mb-2">
-  PENGUMUMAN KELULUSAN<br> SDN PANGKUR 1<br> TAHUN 2025
+  PENGUMUMAN KELULUSAN<br> SDN PANGKUR 1 & 2<br> TAHUN 2025
 </h1>
 <p id="loginInstruction" class="text-white text-lg text-center mb-4 hidden">
   Silakan login menggunakan NISN dan Tanggal Lahir
@@ -312,13 +312,25 @@
         document.getElementById("loginInstruction").classList.add("hidden");
         document.getElementById("hasilKelulusan").classList.remove("hidden");
 
-        document.getElementById("statusKelulusan").innerHTML = data.lulus
-          ? '<div class="bg-green-600 p-6 rounded-xl shadow">SELAMAT ANDA DINYATAKAN LULUS</div>'
-          : '<div class="bg-red-700 p-6 rounded-xl shadow">MAAF, ANDA DINYATAKAN TIDAK LULUS</div>';
-        document.getElementById("nilaiSiswa").textContent = "Nilai Anda: " + data.nilai;
-        document.getElementById("pesanKelulusan").textContent = data.lulus
-          ? "Selamat dan sukses untuk jenjang selanjutnya!"
-          : "Tetap semangat, masih ada banyak kesempatan untuk belajar!";
+      const statusKelulusan = document.getElementById("statusKelulusan");
+const nilaiSiswa = document.getElementById("nilaiSiswa");
+const pesanKelulusan = document.getElementById("pesanKelulusan");
+
+nilaiSiswa.textContent = "Nilai Anda: " + data.nilai;
+
+if (data.nilai >= 75) {
+  statusKelulusan.innerHTML =
+    '<div class="bg-green-600 p-6 rounded-xl shadow text-white font-bold text-xl text-center">SELAMAT ANDA DINYATAKAN LULUS</div>';
+  pesanKelulusan.textContent = "Selamat dan sukses untuk jenjang selanjutnya!";
+} else if (data.nilai >= 70) {
+  statusKelulusan.innerHTML =
+    '<div class="bg-yellow-500 p-6 rounded-xl shadow text-white font-bold text-xl text-center">ANDA LULUS BERSYARAT</div>';
+  pesanKelulusan.textContent = "Hubungi wali kelas untuk informasi lebih lanjut.";
+} else {
+  statusKelulusan.innerHTML =
+    '<div class="bg-red-700 p-6 rounded-xl shadow text-white font-bold text-xl text-center">MAAF, ANDA DINYATAKAN TIDAK LULUS</div>';
+  pesanKelulusan.textContent = "Tetap semangat, masih ada banyak kesempatan untuk belajar!";
+}
       }, 15000); // loading animasi delay
     } else {
       loadingBar.classList.add("hidden");

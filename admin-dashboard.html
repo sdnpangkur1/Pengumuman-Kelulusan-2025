@@ -45,9 +45,11 @@
       <input id="tambahTanggal" type="text" placeholder="Tanggal Lahir (DDMMYYYY)" class="p-2 rounded text-black">
       <input id="tambahNilai" type="number" placeholder="Nilai" class="p-2 rounded text-black">
     </div>
-    <div class="mt-2">
-      <label><input type="checkbox" id="tambahLulus" class="mr-2">Lulus</label>
-    </div>
+    <div id="opsiLulusBersyarat" class="mt-2 hidden">
+  <label><input type="checkbox" id="lulusBersyarat" class="mr-2">Lulus Bersyarat</label>
+</div>
+<div id="statusKelulusan" class="mt-2 font-semibold"></div>
+
     <button onclick="tambahSiswa()" class="mt-2 bg-white text-blue-800 px-4 py-2 rounded">Tambah</button>
     <div id="statusTambah" class="text-sm mt-2"></div>
   </div>
@@ -113,7 +115,13 @@
       const nama = document.getElementById("tambahNama").value.trim();
       const tanggal = document.getElementById("tambahTanggal").value.trim();
       const nilai = parseFloat(document.getElementById("tambahNilai").value.trim());
-      const lulus = document.getElementById("tambahLulus").checked;
+      let lulus = false;
+if (nilai > 75) {
+  lulus = true;
+} else if (nilai === 75) {
+  lulus = document.getElementById("lulusBersyarat").checked;
+}
+
 
       if (!nisn || !nama || !tanggal || isNaN(nilai)) {
         document.getElementById("statusTambah").textContent = "Mohon lengkapi semua data dengan benar.";
@@ -151,6 +159,46 @@
         document.getElementById("statusSimpanWaktu").textContent = error ? "Gagal menyimpan." : "Waktu akses berhasil disimpan.";
       });
     }
+// Deteksi nilai dan tentukan kelulusan otomatis
+document.getElementById("tambahNilai").addEventListener("input", function () {
+  const nilai = parseFloat(this.value);
+  const statusKelulusan = document.getElementById("statusKelulusan");
+  const opsiLulusBersyarat = document.getElementById("opsiLulusBersyarat");
+  const checkboxLulusBersyarat = document.getElementById("lulusBersyarat");
+
+  opsiLulusBersyarat.classList.add("hidden");
+  checkboxLulusBersyarat.checked = false;
+
+  if (isNaN(nilai)) {
+    statusKelulusan.textContent = "";
+    return;
+  }
+
+  if (nilai > 75) {
+    statusKelulusan.textContent = "Status: Lulus ✅";
+    statusKelulusan.className = "mt-2 font-semibold text-green-400";
+  } else if (nilai === 75) {
+    opsiLulusBersyarat.classList.remove("hidden");
+    statusKelulusan.textContent = checkboxLulusBersyarat.checked
+      ? "Status: Lulus Bersyarat ⚠️"
+      : "Status: Belum Lulus ❌";
+    statusKelulusan.className = checkboxLulusBersyarat.checked
+      ? "mt-2 font-semibold text-yellow-400"
+      : "mt-2 font-semibold text-red-400";
+
+    checkboxLulusBersyarat.addEventListener("change", () => {
+      statusKelulusan.textContent = checkboxLulusBersyarat.checked
+        ? "Status: Lulus Bersyarat ⚠️"
+        : "Status: Belum Lulus ❌";
+      statusKelulusan.className = checkboxLulusBersyarat.checked
+        ? "mt-2 font-semibold text-yellow-400"
+        : "mt-2 font-semibold text-red-400";
+    });
+  } else {
+    statusKelulusan.textContent = "Status: Tidak Lulus ❌";
+    statusKelulusan.className = "mt-2 font-semibold text-red-400";
+  }
+});
 
     // Auto load data siswa saat halaman dibuka
     window.onload = renderSiswa;
