@@ -103,7 +103,10 @@
               <td class="border px-4 py-2">${data.nilai}</td>
               <td class="border px-4 py-2">${data.lulus ? "Lulus" : "Tidak Lulus"}</td>
               <td class="border px-4 py-2">
-                <button onclick="hapusSiswa('${child.key}')" class="bg-red-600 px-2 py-1 rounded text-sm">Hapus</button>
+                 <button onclick="editSiswa('${child.key}', '${data.nama}', '${data.tanggal_lahir}', ${data.nilai})" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm mr-2">Edit</button>
+  <button onclick="hapusSiswa('${child.key}')" class="bg-red-600 px-2 py-1 rounded text-sm">Hapus</button>
+</td>
+
               </td>
             </tr>`;
         });
@@ -148,6 +151,40 @@ if (nilai > 75) {
         db.ref("siswa/" + nisn).remove(() => renderSiswa());
       }
     }
+function editSiswa(nisn, nama, tanggal, nilai) {
+  const namaBaru = prompt("Edit Nama:", nama);
+  if (namaBaru === null) return;
+
+  const tanggalBaru = prompt("Edit Tanggal Lahir (DDMMYYYY):", tanggal);
+  if (tanggalBaru === null) return;
+
+  const nilaiBaru = parseFloat(prompt("Edit Nilai:", nilai));
+  if (isNaN(nilaiBaru)) {
+    alert("Nilai harus berupa angka.");
+    return;
+  }
+
+  let lulus = false;
+  if (nilaiBaru > 75) {
+    lulus = true;
+  } else if (nilaiBaru === 75) {
+    lulus = confirm("Nilai 75 terdeteksi. Apakah siswa ini LULUS BERSYARAT?");
+  }
+
+  db.ref("siswa/" + nisn).update({
+    nama: namaBaru,
+    tanggal_lahir: tanggalBaru,
+    nilai: nilaiBaru,
+    lulus: lulus
+  }, (error) => {
+    if (error) {
+      alert("Gagal mengedit data.");
+    } else {
+      alert("Data berhasil diperbarui.");
+      renderSiswa();
+    }
+  });
+}
 
     function simpanWaktuAkses() {
       const waktu = document.getElementById("waktuAksesInput").value;
