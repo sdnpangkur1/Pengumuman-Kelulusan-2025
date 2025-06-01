@@ -1,7 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta property="og:title" content="Pengumuman Kelulusan SDN Pangkur 1 & 2" />
+
+  <!-- Tambahkan ini di dalam tag <head> -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+        }
+      }
+    }
+  }
+</script>
+
+<meta property="og:title" content="Pengumuman Kelulusan SDN Pangkur 1 & 2" />
 <meta property="og:description" content="Selamat! Cek pengumuman kelulusan SDN Pangkur 1 & 2 Tahun 2025 di sini." />
 <meta property="og:image" content="https://sdnpangkur1.web.app/images/kelulusan2025.jpg" />
 <meta property="og:url" content="https://sdnpangkur1.web.app" />
@@ -30,6 +46,7 @@
   </style>
 </head>
 <body class="bg-blue-900 bg-opacity-90 text-white min-h-screen flex flex-col justify-between relative">
+  <body class="font-sans"></body>
   <div class="p-4 sm:p-6 text-center">
     <img src="logo.png" alt="Logo" class="mx-auto w-20 mb-4" />
     <h1 id="judulUtama" class="text-3xl sm:text-3xl font-extrabold text-yellow-300 mb-2">
@@ -318,14 +335,14 @@ const pesanKelulusan = document.getElementById("pesanKelulusan");
 
 nilaiSiswa.textContent = "Nilai Anda: " + data.nilai;
 
-if (data.nilai >= 75) {
-  statusKelulusan.innerHTML =
-    '<div class="bg-green-600 p-6 rounded-xl shadow text-white font-bold text-xl text-center">SELAMAT ANDA DINYATAKAN LULUS</div>';
-  pesanKelulusan.textContent = "Selamat dan sukses untuk jenjang selanjutnya!";
-} else if (data.nilai > 75) {
+if (data.nilai === 75) {
   statusKelulusan.innerHTML =
     '<div class="bg-yellow-500 p-6 rounded-xl shadow text-white font-bold text-xl text-center">ANDA LULUS BERSYARAT</div>';
   pesanKelulusan.textContent = "Hubungi wali kelas untuk informasi lebih lanjut.";
+} else if (data.nilai > 75) {
+  statusKelulusan.innerHTML =
+    '<div class="bg-green-600 p-6 rounded-xl shadow text-white font-bold text-xl text-center">SELAMAT ANDA DINYATAKAN LULUS</div>';
+  pesanKelulusan.textContent = "Selamat dan sukses untuk jenjang selanjutnya!";
 } else {
   statusKelulusan.innerHTML =
     '<div class="bg-red-700 p-6 rounded-xl shadow text-white font-bold text-xl text-center">MAAF, ANDA DINYATAKAN TIDAK LULUS</div>';
