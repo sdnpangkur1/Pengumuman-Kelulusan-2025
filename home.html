@@ -126,10 +126,10 @@
 
     <!-- Hasil Kelulusan -->
     <div id="hasilKelulusan" class="hidden mt-6">
-  <div id="namaSiswa" class="text-2xl font-bold text-white-300 mb-8"></div>
+  <div id="namaSiswa" class="text-2xl font-extrabold text-white-300 mb-8"></div>
   <div id="statusKelulusan" class="text-xl font-bold mb-4"></div>
   <div id="nilaiSiswa" class="text-xl text-yellow-300 font-bold mb-6"></div>
-  <div class="text-sm mb-1">Nilai ambang batas: 70</div>
+  <div class="text-sm mb-1">Nilai ambang batas: 75</div>
   <div id="pesanKelulusan" class="text-md"></div>
   <button onclick="logoutSiswa()" class="mt-4 bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
 </div>
@@ -322,7 +322,7 @@ if (data.nilai >= 75) {
   statusKelulusan.innerHTML =
     '<div class="bg-green-600 p-6 rounded-xl shadow text-white font-bold text-xl text-center">SELAMAT ANDA DINYATAKAN LULUS</div>';
   pesanKelulusan.textContent = "Selamat dan sukses untuk jenjang selanjutnya!";
-} else if (data.nilai >= 70) {
+} else if (data.nilai > 75) {
   statusKelulusan.innerHTML =
     '<div class="bg-yellow-500 p-6 rounded-xl shadow text-white font-bold text-xl text-center">ANDA LULUS BERSYARAT</div>';
   pesanKelulusan.textContent = "Hubungi wali kelas untuk informasi lebih lanjut.";
